@@ -8,6 +8,8 @@
     <input type="submit" value="Odeslat">
 </form>
 <?php
+ini_set('error_reporting', -1);
+ini_set('display_errors', '1');
 if (!empty($_GET['wizard_spell'])) {
     require_once __DIR__ . '/wizard.php';
     $spellAsTable = wizard_spell_to_table($_GET['wizard_spell']);

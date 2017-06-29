@@ -21,33 +21,41 @@ function wizard_spell_to_table(string $spell)
     $heading = array_shift($rows);
     $cells = [];
     foreach ($rows as $index => $row) {
+        $row = trim($row);
+        if ($row === '') {
+            continue;
+        }
         $matches = [];
-        switch ($index) {
-            case 0:
+        preg_match('~^(?<word>\w*)~u', $row, $wordMatch);
+        switch ($wordMatch['word']) {
+            case 'Magenergie':
                 preg_match('~^(\w+:)(.+)$~u', $row, $matches);
                 $matches[] = ''; // empty cell
                 break;
-            case 1:
+            case 'Náročnost':
                 preg_match('~^(\w+:)\s+([+-]?\d+)\s+(.+)$~u', $row, $matches);
                 break;
-            case 2:
-            case 3:
+            case '':
                 preg_match('~^([+-]?\d+)\s+(.+)$~', $row, $matches);
                 $matches[0] = ''; // empty cell to start
                 array_unshift($matches, ''); // just something to remove as "full match"
                 break;
-            case 4:
-            case 5:
-            case 6:
+            case 'Vyvolání':
+            case 'Dosah':
                 if (preg_match('~^Vyvolání: \+0(?<whiteSpace>\s*)~', $row, $castingMatches)) {
                     $row = 'Vyvolání: +0 (1 kolo)' . $castingMatches['whiteSpace'];
+                } else if (preg_match('~^Vyvolání: \+6(?<whiteSpace>\s*)~', $row, $castingMatches)) {
+                    $row = 'Vyvolání: +6 (2 kola)' . $castingMatches['whiteSpace'];
                 } else if (preg_match('~^Dosah: \+20(?<whiteSpace>\s*)~', $row, $castingMatches)) {
                     $row = 'Dosah: +20 (10 metrů)' . $castingMatches['whiteSpace'];
+                } else if (preg_match('~^Dosah: \+?0(?<whiteSpace>\s*)~', $row, $castingMatches)) {
+                    $row = 'Dosah: +0 (1 metr)' . $castingMatches['whiteSpace'];
                 }
                 preg_match('~^(\w+:)(.+)$~u', $row, $matches);
                 $matches[] = ''; // empty cell
                 break;
-            case 7:
+            case 'Rozsah':
+            case 'Trvání':
                 preg_match('~^(\w+:)(.+)$~u', $row, $matches);
                 $cells[] = matches_to_cells($matches, [1 => 2]);
                 unset($matches);
