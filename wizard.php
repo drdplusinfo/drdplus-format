@@ -41,6 +41,8 @@ function wizard_spell_to_table(string $spell)
             case 6:
                 if (preg_match('~^Vyvolání: \+0(?<whiteSpace>\s*)~', $row, $castingMatches)) {
                     $row = 'Vyvolání: +0 (1 kolo)' . $castingMatches['whiteSpace'];
+                } else if (preg_match('~^Dosah: \+20(?<whiteSpace>\s*)~', $row, $castingMatches)) {
+                    $row = 'Dosah: +20 (10 metrů)' . $castingMatches['whiteSpace'];
                 }
                 preg_match('~^(\w+:)(.+)$~u', $row, $matches);
                 $matches[] = ''; // empty cell

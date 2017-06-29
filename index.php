@@ -12,11 +12,18 @@ if (!empty($_GET['wizard_spell'])) {
     require_once __DIR__ . '/wizard.php';
     $spellAsTable = wizard_spell_to_table($_GET['wizard_spell']);
     ?>
-    <pre id="selected"><?= $spellAsTable ?></pre>
+    <label>tabulka<br>
+        <textarea rows="15" cols="80" id="wizard-result"><?= $spellAsTable ?></textarea>
+    </label>
 <?php } ?>
 <script type="text/javascript">
-    let wizard = document.getElementsByClassName('wizard')[0];
-    wizard.focus();
+    let wizardResult = document.getElementById('wizard-result');
+    if (wizardResult.value) {
+        wizardResult.focus();
+    } else {
+        let wizard = document.getElementsByClassName('wizard')[0];
+        wizard.focus();
+    }
 </script>
 </body>
 </html>
