@@ -26,8 +26,8 @@ function wizard_spell_to_table(string $spell)
             continue;
         }
         $matches = [];
-        preg_match('~^(?<word>\w*)~u', $row, $wordMatch);
-        switch ($wordMatch['word']) {
+        $parameterName = substr($row, 0, strpos($row, ':'));
+        switch ($parameterName) {
             case 'Magenergie':
                 preg_match('~^(\w+:)(.+)$~u', $row, $matches);
                 $matches[] = ''; // empty cell
@@ -56,12 +56,14 @@ function wizard_spell_to_table(string $spell)
                 break;
             case 'Rozsah':
             case 'Trvání':
-                preg_match('~^(\w+:)(.+)$~u', $row, $matches);
+            case 'Nepřesnost':
+            case 'Doba překladu':
+                preg_match('~^([^:]+:)(.+)$~u', $row, $matches);
                 $cells[] = matches_to_cells($matches, [1 => 2]);
                 unset($matches);
                 break;
             default:
-                throw new \LogicException();
+                throw new \LogicException('Unexpected spell parameter ' . $parameterName);
         }
         if (!empty($matches)) {
             $cells[] = matches_to_cells($matches);
@@ -88,4 +90,73 @@ function wizard_spell_to_table(string $spell)
 </table>
 HTML
     );
+}
+
+function wizard_spells_from_table_of_content_to_table(string $tableOfContent)
+{
+    $spells = array_filter(
+        array_map(
+            function (string $row) {
+                return trim($row);
+            },
+            explode("\n", $tableOfContent)
+        ),
+        function (string $row) {
+            return $row !== '';
+        }
+    );
+    $tables = [];
+    $table = [];
+    foreach ($spells as $row) {
+        if (!preg_match('~\d~', $row) && count($table) > 0) {
+            $tables[] = $table;
+            $table = [];
+        }
+        $table[] = $row;
+    }
+    $tables[] = $table;
+    $result = '';
+    /** @var array $table */
+    foreach ($tables as $table) {
+        $heading = array_shift($table);
+        $cells = [];
+        foreach ($table as $index => $spell) {
+            $spell = trim($spell);
+            if ($spell === '') {
+                continue;
+            }
+            // Bahenní lázeň 4 mg [7] Mat. . . . . . . 57
+            preg_match('~^(\D+)\s*(\d+[^.]+)[.\s]+(\d+)~u', $spell, $parts);
+            if (!empty($parts)) {
+                $parts = array_map(function(string $part) {
+                    return trim($part);
+                }, $parts);
+                $spellId = rtrim($parts[1], '*');
+                $parts[1] = "<a href=\"#{$spellId}\">{$parts[1]}</a>";
+                $cells[] = matches_to_cells($parts);
+            }
+        }
+        $heading = trim($heading);
+        $tableContent = implode(
+            "\n",
+            array_map(
+                function (array $rowWithCells) {
+                    return '        <tr>' . implode($rowWithCells) . '</tr>';
+                },
+                $cells
+            )
+        );
+        $result .= htmlspecialchars(<<<HTML
+<table class="spells-list">
+    <caption id="{$heading}">{$heading}</caption>
+    <tbody>
+{$tableContent}
+    </tbody>
+</table>
+
+HTML
+        );
+    }
+
+    return $result;
 }
