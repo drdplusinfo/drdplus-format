@@ -14,6 +14,13 @@
     <br>
     <input type="submit" value="Odeslat">
 </form>
+<form style="float: left; margin-left: 1em" method="get">
+    <label>Bojové parametry kouzla<br>
+        <textarea rows="10" cols="50" name="wizard_spell_combat_properties" class="wizard"></textarea>
+    </label>
+    <br>
+    <input type="submit" value="Odeslat">
+</form>
 <div style="clear: both"></div>
 <?php
 ini_set('error_reporting', -1);
@@ -31,6 +38,13 @@ if (!empty($_GET['wizard_spell'])) {
     ?>
     <label>tabulka<br>
         <textarea rows="20" cols="80" id="wizard-result"><?= $spellAsTable ?></textarea>
+    </label>
+<?php } else if (!empty($_GET['wizard_spell_combat_properties'])) {
+    require_once __DIR__ . '/wizard.php';
+    $spellAsTable = wizard_spell_combat_properties_to_table($_GET['wizard_spell_combat_properties']);
+    ?>
+    <label>tabulka<br>
+        <textarea rows="10" cols="80" id="wizard-result"><?= $spellAsTable ?></textarea>
     </label>
 <?php } ?>
 <script type="text/javascript">

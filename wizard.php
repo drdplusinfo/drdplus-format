@@ -128,7 +128,7 @@ function wizard_spells_from_table_of_content_to_table(string $tableOfContent)
             // Bahenní lázeň 4 mg [7] Mat. . . . . . . 57
             preg_match('~^(\D+)\s*(\d+[^.]+)[.\s]+(\d+)~u', $spell, $parts);
             if (!empty($parts)) {
-                $parts = array_map(function(string $part) {
+                $parts = array_map(function (string $part) {
                     return trim($part);
                 }, $parts);
                 $spellId = rtrim($parts[1], '*');
@@ -159,4 +159,103 @@ HTML
     }
 
     return $result;
+}
+
+function wizard_spell_combat_properties_to_table(string $combatParameters)
+{
+    $parameters = array_filter(
+        array_map(
+            function (string $row) {
+                return trim($row);
+            },
+            explode("\n", $combatParameters)
+        ),
+        function (string $row) {
+            return $row !== '';
+        }
+    );
+    /*
+    Potřebná síla
+    Délka Útočnost ZZ Typ Kryt
+    Plamenný bič – 4 4 * +O –
+    *) Podle Síly kouzla
+    */
+    $headParts = [];
+    foreach ($parameters as $index => $parameterRow) {
+        if (preg_match('~\d~', $parameterRow)) {
+            break;
+        }
+        $headParts[] = $parameterRow;
+        unset($parameters[$index]);
+    }
+    $head = implode(' ', $headParts);
+    $explanations = [];
+    do {
+        $explanation = preg_match('~^(?<stars>\*+)\)~', end($parameters), $matchedStars)
+            ? array_pop($parameters) // removes last row
+            : false;
+        if ($explanation !== false) {
+            $stars = $matchedStars['stars'];
+            if (array_key_exists($stars, $explanations)) {
+                throw new \RuntimeException("Can not use {$explanation} because {$stars} are already used for " . $explanations[$stars]);
+            }
+            $explanations[$stars] = $explanation;
+        }
+    } while ($explanation !== false);
+    $body = implode(' ', $parameters);
+    if ($explanations) {
+        foreach ($explanations as $stars => $explanation) {
+            $explanation = trim(str_replace($stars . ')', '', $explanation));
+            $explanation = ucfirst(strtolower($explanation));
+            $body = str_replace(' ' . $stars, ' ' .$explanation, $body);
+        }
+    }
+
+    $splitCells = function (string $concatenated) {
+        $parts = preg_split('~\s~', $concatenated, -1, PREG_SPLIT_NO_EMPTY);
+        $cell = [];
+        foreach ($parts as $part) {
+            if ($cell !== [] && preg_match('~^([^a-z]|[A-Z])~', $part)) {
+                $cells[] = implode(' ', $cell);
+                $cell = [];
+            }
+            $cell[] = $part;
+        }
+        $cells[] = implode(' ', $cell);
+
+        return $cells;
+    };
+    $headerCells = $splitCells($head);
+    array_unshift($headerCells, ''); // first header cell points to spell name data cell
+    $bodyCells = $splitCells($body);
+
+    $headerRow = implode(
+        array_map(
+            function (string $cell) {
+                return "<th>$cell</th>";
+            },
+            $headerCells
+        )
+    );
+    $bodyRow = implode(
+        array_map(
+            function (string $cell) {
+                return "<td>$cell</td>";
+            },
+            $bodyCells
+        )
+    );
+
+    return htmlspecialchars(<<<HTML
+<table class="basic">
+    <thead>
+        <tr>{$headerRow}</tr>
+    </thead>
+    <tbody>
+        <tr>{$bodyRow}</tr>
+    </tbody>
+</table>
+
+HTML
+    );
 }
