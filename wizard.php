@@ -206,7 +206,7 @@ function wizard_spell_combat_properties_to_table(string $combatParameters)
     if ($explanations) {
         foreach ($explanations as $stars => $explanation) {
             $explanation = trim(str_replace($stars . ')', '', $explanation));
-            $explanation = ucfirst(strtolower($explanation));
+            $explanation = ucfirst(mb_strtolower($explanation));
             $body = str_replace(' ' . $stars, ' ' .$explanation, $body);
         }
     }
@@ -215,7 +215,7 @@ function wizard_spell_combat_properties_to_table(string $combatParameters)
         $parts = preg_split('~\s~', $concatenated, -1, PREG_SPLIT_NO_EMPTY);
         $cell = [];
         foreach ($parts as $part) {
-            if ($cell !== [] && preg_match('~^([^a-z]|[A-Z])~', $part)) {
+            if ($cell !== [] && preg_match('~^([^[:lower:]]|[[:upper:]])~u', $part)) {
                 $cells[] = implode(' ', $cell);
                 $cell = [];
             }
