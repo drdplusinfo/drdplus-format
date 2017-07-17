@@ -2,6 +2,7 @@
 function thief_properties_highlighted(string $text)
 {
     $highlighted = '';
+    $text = join_rows($text);
     foreach (preg_split("~[\r\n]+~", $text, -1, PREG_SPLIT_NO_EMPTY) as $row) {
         $row = format_2k6_plus($row);
         $row = add_duration_link($row);
@@ -31,7 +32,7 @@ function add_duration_link(string $text): string
 
 function add_concentration_link(string $text): string
 {
-    return preg_replace_callback('~(plné|volné soustředění)~', function (array $matches) {
+    return preg_replace_callback('~(plné|volné soustředění|automatická činnost)~', function (array $matches) {
         return '<a href="https://pph.drdplus.info/#' . ucfirst($matches[1]) . '">' . $matches[1] . '</a>';
     }, $text);
 }
@@ -39,4 +40,20 @@ function add_concentration_link(string $text): string
 function format_master_bonus(string $text)
 {
     return preg_replace('~Bonus Mistra:(\s*)([^-–]+)\s+[-–]~u', 'Bonus mistra:$1<span class="keyword"><a href="#$2">$2</a></span> –', $text);
+}
+
+function join_rows(string $text): string
+{
+    $rows = preg_split("~[\r\n]+~", $text, -1, PREG_SPLIT_NO_EMPTY);
+    $joined = '';
+    foreach ($rows as $row) {
+        if (preg_match('~^([[:upper:]]|méně)~u', $row)) {
+            $joined .= "\n";
+        } else {
+            $joined .= ' ';
+        }
+        $joined .= trim($row);
+    }
+
+    return $joined;
 }
