@@ -21,7 +21,7 @@ function thief_properties_highlighted(string $text)
 
 function format_2k6_plus(string $text): string
 {
-    return preg_replace('~2k6\+\s+~', '2k6<span class="upper-index">+</span>', $text);
+    return preg_replace('~2k6\+\s*~', '2k6<span class="upper-index">+</span>', $text);
 }
 
 function add_duration_link(string $text): string
