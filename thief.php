@@ -37,7 +37,7 @@ function add_duration_link(string $text): string
 
 function add_concentration_link(string $text): string
 {
-    return preg_replace_callback('~(plné|volné soustředění|automatická činnost)~', function (array $matches) {
+    return preg_replace_callback('~(plné soustředění|volné soustředění|automatická činnost)~', function (array $matches) {
         return '<a href="https://pph.drdplus.info/#' . ucfirst($matches[1]) . '">' . $matches[1] . '</a>';
     }, $text);
 }
