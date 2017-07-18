@@ -17,7 +17,7 @@ function thief_properties_highlighted(string $text)
         }
     }
 
-    return "<div class='properties'>\n{$highlighted}</div>\n";
+    return "<div class=\"parameters\">\n{$highlighted}</div>\n";
 }
 
 function split_to_rows(string $text): array
