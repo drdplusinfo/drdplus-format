@@ -3,7 +3,7 @@ function thief_properties_highlighted(string $text)
 {
     $highlighted = '';
     $text = join_rows($text);
-    foreach (preg_split("~[\r\n]+~", $text, -1, PREG_SPLIT_NO_EMPTY) as $row) {
+    foreach (split_to_rows($text) as $row) {
         $row = format_2k6_plus($row);
         $row = add_duration_link($row);
         $row = add_concentration_link($row);
@@ -18,6 +18,11 @@ function thief_properties_highlighted(string $text)
     }
 
     return "<div class='properties'>\n{$highlighted}</div>\n";
+}
+
+function split_to_rows(string $text): array
+{
+    return preg_split("~[\r\n]+~", $text, -1, PREG_SPLIT_NO_EMPTY);
 }
 
 function format_2k6_plus(string $text): string
@@ -44,9 +49,8 @@ function format_master_bonus(string $text)
 
 function join_rows(string $text): string
 {
-    $rows = preg_split("~[\r\n]+~", $text, -1, PREG_SPLIT_NO_EMPTY);
     $joined = '';
-    foreach ($rows as $row) {
+    foreach (split_to_rows($text) as $row) {
         if (preg_match('~^([[:upper:]]|méně)~u', $row)) {
             $joined .= "\n";
         } else {
@@ -56,4 +60,25 @@ function join_rows(string $text): string
     }
 
     return $joined;
+}
+
+function format_extended_roll_on_success(string $text)
+{
+    $formatted = ['<div class="calculation">'];
+    $rows = split_to_rows($text);
+    $formula = array_shift($rows);
+    $formatted[] = '<span class="formula">' . format_2k6_plus(str_replace(' :', ':', $formula)) . '</span>';
+    $formatted[] = '<table class="result">';
+    foreach ($rows as $row) {
+        $cells = preg_split('/\s*~\s*/', $row, -1, PREG_SPLIT_NO_EMPTY);
+        $formattedCells = array_map(function (string $cell) {
+            return "<td>{$cell}</td>";
+        }, $cells);
+        $formattedRow = implode('<td>~</td>', $formattedCells);
+        $formatted[] = "<tr>{$formattedRow}</tr>";
+    }
+    $formatted[] = '</table>';
+    $formatted[] = '</div>';
+
+    return implode("\n", $formatted);
 }

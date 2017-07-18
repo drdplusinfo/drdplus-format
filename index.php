@@ -49,6 +49,14 @@
     <br>
     <input type="submit" value="Odeslat">
 </form>
+<form method="get">
+    <label>Rozšířený hod na úspěch<br>
+        <textarea rows="10" cols="50" name="extended_roll_on_success" class="thief"></textarea>
+    </label>
+    <br>
+    <input type="submit" value="Odeslat">
+</form>
+<div class="clear"></div>
 <?php
 ini_set('error_reporting', -1);
 ini_set('display_errors', '1');
@@ -78,7 +86,14 @@ if (!empty($_GET['wizard_spell'])) {
     $propertiesHighlighted = thief_properties_highlighted($_GET['thief_skill_properties']);
     ?>
     <label>dovednost<br>
-        <textarea rows="10" cols="80" id="result"><?= $propertiesHighlighted ?></textarea>
+        <textarea rows="5" cols="50" id="result"><?= $propertiesHighlighted ?></textarea>
+    </label>
+<?php } else if (!empty($_GET['extended_roll_on_success'])) {
+    require_once __DIR__ . '/thief.php';
+    $extendedRollOnSuccess = format_extended_roll_on_success($_GET['extended_roll_on_success']);
+    ?>
+    <label>hod<br>
+        <textarea rows="10" cols="70" id="result"><?= $extendedRollOnSuccess ?></textarea>
     </label>
 <?php } ?>
 <script type="text/javascript">
