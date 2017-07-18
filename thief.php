@@ -32,7 +32,7 @@ function format_2k6_plus(string $text): string
 
 function add_duration_link(string $text): string
 {
-    return preg_replace('~(Trvání:) (.+)~', '$1 <a href="https://pph.drdplus.info/#tabulka_casu">$2</a>', $text);
+    return preg_replace('~(Trvání:) ((?:(!:trvalý bonus).)+)~', '$1 <a href="https://pph.drdplus.info/#tabulka_casu">$2</a>', $text);
 }
 
 function add_concentration_link(string $text): string
