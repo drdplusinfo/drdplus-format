@@ -94,8 +94,6 @@ function combat_parameters_to_table(string $combatParameters)
         $headerRows[] = $row;
         unset($rows[$index]);
     }
-    $headerRows[0] = $headerRows[0] . ' ' . $headerRows[1]; // skill name begins with uppercase
-    unset($headerRows[1]);
     $headerRows = array_map('split_to_header_cells', $headerRows);
     $header = join_to_table_rows($headerRows);
     $bodyRows = array_map('split_to_body_cells', $rows);
