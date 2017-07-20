@@ -32,7 +32,7 @@ function format_2k6_plus(string $text): string
 
 function add_duration_link(string $text): string
 {
-    return preg_replace('~(Trvání:) ((?:(?!(?:trvalý bonus|speciální)).)+)~', '$1 <a href="https://pph.drdplus.info/#tabulka_casu">$2</a>', $text);
+    return preg_replace('~(Trvání:) ((?:(?!(?:trvalý bonus|speciální|[-–])).)+)~', '$1 <a href="https://pph.drdplus.info/#tabulka_casu">$2</a>', $text);
 }
 
 function add_concentration_link(string $text): string
@@ -94,6 +94,8 @@ function combat_parameters_to_table(string $combatParameters)
         $headerRows[] = $row;
         unset($rows[$index]);
     }
+    $headerRows[0] = $headerRows[0] . ' ' . $headerRows[1]; // skill name begins with uppercase
+    unset($headerRows[1]);
     $headerRows = array_map('split_to_header_cells', $headerRows);
     $header = join_to_table_rows($headerRows);
     $bodyRows = array_map('split_to_body_cells', $rows);
