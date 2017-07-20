@@ -161,7 +161,7 @@ HTML
     return $result;
 }
 
-function wizard_spell_combat_properties_to_table(string $combatParameters)
+function wizard_spell_combat_parameters_to_table(string $combatParameters)
 {
     $parameters = array_filter(
         array_map(

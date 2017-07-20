@@ -82,3 +82,74 @@ function format_extended_roll_on_success(string $text)
 
     return implode("\n", $formatted);
 }
+
+function combat_parameters_to_table(string $combatParameters)
+{
+    $rows = split_to_rows($combatParameters);
+    $headerRows = [];
+    foreach ($rows as $index => $row) {
+        if (preg_match('~\d~', $row)) { // only body contains numbers
+            break;
+        }
+        $headerRows[] = $row;
+        unset($rows[$index]);
+    }
+    $headerRows = array_map('split_to_header_cells', $headerRows);
+    $header = join_to_table_rows($headerRows);
+    $bodyRows = array_map('split_to_body_cells', $rows);
+    $body = join_to_table_rows($bodyRows);
+
+    return htmlspecialchars(<<<HTML
+<table class="basic">
+    <thead>
+        {$header}
+    </thead>
+    <tbody>
+        {$body}
+    </tbody>
+</table>
+
+HTML
+    );
+}
+
+function split_to_header_cells(string $row)
+{
+    return split_to_cells($row, 'th');
+}
+
+function split_to_body_cells(string $row)
+{
+    return split_to_cells($row, 'td');
+}
+
+function split_to_cells(string $row, string $wrappingTag)
+{
+    $parts = preg_split('~\s~', $row, -1, PREG_SPLIT_NO_EMPTY);
+    $cellContent = [];
+    foreach ($parts as $part) {
+        if ($cellContent !== [] && preg_match('~^([^[:lower:]]|[[:upper:]])~u', $part)) {
+            $cell = "<$wrappingTag>" . implode(' ', $cellContent) . "</$wrappingTag>";
+            $cells[] = $cell;
+            $cellContent = [];
+        }
+        $cellContent[] = $part;
+    }
+    $cell = "<$wrappingTag>" . implode(' ', $cellContent) . "</$wrappingTag>";
+    $cells[] = $cell;
+
+    return $cells;
+}
+
+function join_to_table_rows(array $rows)
+{
+    return implode(
+        "\n",
+        array_map(
+            function (array $cells) {
+                return '<tr>' . implode($cells) . '</tr>';
+            },
+            $rows
+        )
+    );
+}

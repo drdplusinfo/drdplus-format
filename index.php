@@ -56,6 +56,13 @@
     <br>
     <input type="submit" value="Odeslat">
 </form>
+<form method="get">
+    <label>Bojová dovednost zloděje<br>
+        <textarea rows="10" cols="50" name="thief_combat_parameters" class="thief"></textarea>
+    </label>
+    <br>
+    <input type="submit" value="Odeslat">
+</form>
 <div class="clear"></div>
 <?php
 ini_set('error_reporting', -1);
@@ -76,7 +83,7 @@ if (!empty($_GET['wizard_spell'])) {
     </label>
 <?php } else if (!empty($_GET['wizard_spell_combat_properties'])) {
     require_once __DIR__ . '/wizard.php';
-    $spellAsTable = wizard_spell_combat_properties_to_table($_GET['wizard_spell_combat_properties']);
+    $spellAsTable = wizard_spell_combat_parameters_to_table($_GET['wizard_spell_combat_properties']);
     ?>
     <label>tabulka<br>
         <textarea rows="10" cols="80" id="wizard-result"><?= $spellAsTable ?></textarea>
@@ -94,6 +101,13 @@ if (!empty($_GET['wizard_spell'])) {
     ?>
     <label>hod<br>
         <textarea rows="9" cols="70" id="result"><?= $extendedRollOnSuccess ?></textarea>
+    </label>
+<?php } else if (!empty($_GET['thief_combat_parameters'])) {
+    require_once __DIR__ . '/thief.php';
+    $thiefCombatParameters = combat_parameters_to_table($_GET['thief_combat_parameters']);
+    ?>
+    <label>tabulka<br>
+        <textarea rows="9" cols="70" id="result"><?= $thiefCombatParameters ?></textarea>
     </label>
 <?php } ?>
 <script type="text/javascript">
