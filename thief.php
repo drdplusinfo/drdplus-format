@@ -32,7 +32,7 @@ function format_2k6_plus(string $text): string
 
 function add_duration_link(string $text): string
 {
-    return preg_replace('~(Trvání:) ((?:(?!(?:trvalý bonus|speciální|[-–])).)+)~', '$1 <a href="https://pph.drdplus.info/#tabulka_casu">$2</a>', $text);
+    return preg_replace('~(Trvání(?: výroby):) ((?:(?!(?:trvalý bonus|speciální|[-–])).)+)~', '$1 <a href="https://pph.drdplus.info/#tabulka_casu">$2</a>', $text);
 }
 
 function add_concentration_link(string $text): string
@@ -83,7 +83,7 @@ function format_extended_roll_on_success(string $text)
     return implode("\n", $formatted);
 }
 
-function combat_parameters_to_table(string $combatParameters)
+function parameters_to_table(string $combatParameters)
 {
     $rows = split_to_rows($combatParameters);
     $headerRows = [];

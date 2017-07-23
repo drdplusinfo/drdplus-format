@@ -104,7 +104,7 @@ if (!empty($_GET['wizard_spell'])) {
     </label>
 <?php } else if (!empty($_GET['thief_combat_parameters'])) {
     require_once __DIR__ . '/thief.php';
-    $thiefCombatParameters = combat_parameters_to_table($_GET['thief_combat_parameters']);
+    $thiefCombatParameters = parameters_to_table($_GET['thief_combat_parameters']);
     ?>
     <label>tabulka<br>
         <textarea rows="9" cols="70" id="result"><?= $thiefCombatParameters ?></textarea>
