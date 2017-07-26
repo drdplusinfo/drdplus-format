@@ -20,7 +20,14 @@
     </style>
 </head>
 <body>
-<form method="get">
+<form>
+    <label>Tabulka<br>
+        <textarea rows="10" cols="50" name="table" class="generic"></textarea>
+    </label>
+    <br>
+    <input type="submit" value="Odeslat">
+</form>
+<form>
     <label>Kouzlo čaroděje<br>
         <textarea rows="10" cols="50" name="wizard_spell" class="wizard"></textarea>
     </label>
@@ -34,7 +41,7 @@
     <br>
     <input type="submit" value="Odeslat">
 </form>
-<form method="get">
+<form>
     <label>Bojové parametry kouzla<br>
         <textarea rows="10" cols="50" name="wizard_spell_combat_properties" class="wizard"></textarea>
     </label>
@@ -42,21 +49,21 @@
     <input type="submit" value="Odeslat">
 </form>
 <div class="clear"></div>
-<form method="get">
+<form>
     <label>Zlodějova schopnost<br>
         <textarea rows="10" cols="50" name="thief_skill_properties" class="thief"></textarea>
     </label>
     <br>
     <input type="submit" value="Odeslat">
 </form>
-<form method="get">
+<form>
     <label>Rozšířený hod na úspěch<br>
         <textarea rows="10" cols="50" name="extended_roll_on_success" class="thief"></textarea>
     </label>
     <br>
     <input type="submit" value="Odeslat">
 </form>
-<form method="get">
+<form>
     <label>Bojová dovednost zloděje<br>
         <textarea rows="10" cols="50" name="thief_combat_parameters" class="thief"></textarea>
     </label>
@@ -67,26 +74,33 @@
 <?php
 ini_set('error_reporting', -1);
 ini_set('display_errors', '1');
-if (!empty($_GET['wizard_spell'])) {
+if (!empty($_GET['table'])) {
+    require_once __DIR__ . '/generic.php';
+    $table = to_table($_GET['table']);
+    ?>
+    <label>tabulka<br>
+        <textarea rows="20" cols="80" id="result"><?= $table ?></textarea>
+    </label>
+<?php } else if (!empty($_GET['wizard_spell'])) {
     require_once __DIR__ . '/wizard.php';
     $spellAsTable = wizard_spell_to_table($_GET['wizard_spell']);
     ?>
     <label>tabulka<br>
-        <textarea rows="20" cols="80" id="wizard-result"><?= $spellAsTable ?></textarea>
+        <textarea rows="20" cols="80" id="result"><?= $spellAsTable ?></textarea>
     </label>
 <?php } else if (!empty($_POST['wizard_spells_from_table_of_content'])) {
     require_once __DIR__ . '/wizard.php';
     $spellAsTable = wizard_spells_from_table_of_content_to_table($_POST['wizard_spells_from_table_of_content']);
     ?>
     <label>tabulka<br>
-        <textarea rows="20" cols="80" id="wizard-result"><?= $spellAsTable ?></textarea>
+        <textarea rows="20" cols="80" id="result"><?= $spellAsTable ?></textarea>
     </label>
 <?php } else if (!empty($_GET['wizard_spell_combat_properties'])) {
     require_once __DIR__ . '/wizard.php';
     $spellAsTable = wizard_spell_combat_parameters_to_table($_GET['wizard_spell_combat_properties']);
     ?>
     <label>tabulka<br>
-        <textarea rows="10" cols="80" id="wizard-result"><?= $spellAsTable ?></textarea>
+        <textarea rows="10" cols="80" id="result"><?= $spellAsTable ?></textarea>
     </label>
 <?php } else if (!empty($_GET['thief_skill_properties'])) {
     require_once __DIR__ . '/thief.php';

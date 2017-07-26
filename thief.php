@@ -1,4 +1,6 @@
 <?php
+include_once __DIR__ . '/generic.php';
+
 function thief_properties_highlighted(string $text)
 {
     $highlighted = '';
@@ -18,16 +20,6 @@ function thief_properties_highlighted(string $text)
     }
 
     return "<div class=\"parameters\">\n{$highlighted}</div>\n";
-}
-
-function split_to_rows(string $text): array
-{
-    return preg_split("~[\r\n]+~", $text, -1, PREG_SPLIT_NO_EMPTY);
-}
-
-function format_2k6_plus(string $text): string
-{
-    return preg_replace('~2k6\+\s*~', '2k6<span class="upper-index">+</span>', $text);
 }
 
 function add_duration_link(string $text): string
@@ -110,46 +102,5 @@ function parameters_to_table(string $combatParameters)
 </table>
 
 HTML
-    );
-}
-
-function split_to_header_cells(string $row)
-{
-    return split_to_cells($row, 'th');
-}
-
-function split_to_body_cells(string $row)
-{
-    return split_to_cells($row, 'td');
-}
-
-function split_to_cells(string $row, string $wrappingTag)
-{
-    $parts = preg_split('~\s~', $row, -1, PREG_SPLIT_NO_EMPTY);
-    $cellContent = [];
-    foreach ($parts as $part) {
-        if ($cellContent !== [] && preg_match('~^([^[:lower:]]|[[:upper:]])~u', $part)) {
-            $cell = "<$wrappingTag>" . implode(' ', $cellContent) . "</$wrappingTag>";
-            $cells[] = $cell;
-            $cellContent = [];
-        }
-        $cellContent[] = $part;
-    }
-    $cell = "<$wrappingTag>" . implode(' ', $cellContent) . "</$wrappingTag>";
-    $cells[] = $cell;
-
-    return $cells;
-}
-
-function join_to_table_rows(array $rows)
-{
-    return implode(
-        "\n",
-        array_map(
-            function (array $cells) {
-                return '<tr>' . implode($cells) . '</tr>';
-            },
-            $rows
-        )
     );
 }
