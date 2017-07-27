@@ -2,11 +2,12 @@
 function to_table(string $text)
 {
     $rows = split_to_rows($text);
-    $headerRows = [
-        ['<th colspan="100%">' . $rows[0] . '</th>'],
-        split_to_header_cells($rows[1]),
-    ];
-    unset($rows[0], $rows[1]);
+    $headerRows = [['<th colspan="100%">' . $rows[0] . '</th>']];
+    unset($rows[0]);
+    if (!preg_match('~\d~', $rows[1])) {
+        $headerRows[] = split_to_header_cells($rows[1]);
+        unset($rows[1]);
+    }
     $header = join_to_table_rows($headerRows);
     $bodyRows = array_map('split_to_body_cells', $rows);
     $body = join_to_table_rows($bodyRows);
