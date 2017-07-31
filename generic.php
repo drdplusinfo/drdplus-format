@@ -1,6 +1,7 @@
 <?php
 function to_table(string $text)
 {
+    $text = unify_dash($text);
     $rows = split_to_rows($text);
     $headerRows = [['<th colspan="100%">' . $rows[0] . '</th>']];
     unset($rows[0]);
@@ -26,9 +27,14 @@ HTML
     );
 }
 
+function unify_dash(string $text): string
+{
+    return str_replace('−', '-', $text);
+}
+
 function split_to_rows(string $text): array
 {
-    $text = preg_replace('~[--][\n\r]+\s*~', '', $text);
+    $text = preg_replace('~-[\n\r]+((?![\n\r])\s)*([[:lower:]])~u', '$1', $text);
     $text = preg_replace('~\s*[\n\r]\s*([^[:upper:]])~u', ' $1', $text);
 
     return preg_split("~[\r\n]+~", $text, -1, PREG_SPLIT_NO_EMPTY);
@@ -55,7 +61,7 @@ function split_to_cells(string $row, string $wrappingTag)
     $cellContent = [];
     foreach ($parts as $index => $part) {
         if ($cellContent !== []
-            && (preg_match('~^([[:upper:]])~u', $part) || (preg_match('~^−?\d~', $part) && ($parts[$index + 1] ?? '') !== 'm'))
+            && (preg_match('~^([[:upper:]])~u', $part) || (preg_match('~^(-|\d)~', $part) && ($parts[$index + 1] ?? '') !== 'm'))
         ) {
             $cell = "<$wrappingTag>" . implode(' ', $cellContent) . "</$wrappingTag>";
             $cells[] = $cell;
