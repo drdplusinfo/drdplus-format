@@ -61,7 +61,7 @@ function split_to_cells(string $row, string $wrappingTag)
     $cellContent = [];
     foreach ($parts as $index => $part) {
         if ($cellContent !== []
-            && (preg_match('~^([[:upper:]])~u', $part) || (preg_match('~^(-|\d)~', $part) && ($parts[$index + 1] ?? '') !== 'm'))
+            && (preg_match('~^([[:upper:]])~u', $part) || (preg_match('~^(-|\+|\d)~', $part) && ($parts[$index + 1] ?? '') !== 'm'))
         ) {
             $cell = "<$wrappingTag>" . implode(' ', $cellContent) . "</$wrappingTag>";
             $cells[] = $cell;
