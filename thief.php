@@ -75,7 +75,7 @@ function format_extended_roll_on_success(string $text)
     return implode("\n", $formatted);
 }
 
-function parameters_to_table(string $combatParameters)
+function combat_parameters_to_table(string $combatParameters)
 {
     $rows = split_to_rows($combatParameters);
     $headerRows = [];

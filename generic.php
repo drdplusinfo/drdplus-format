@@ -1,5 +1,5 @@
 <?php
-function to_table(string $text)
+function to_table(string $text): string
 {
     $text = unify_dash($text);
     $rows = split_to_rows($text);
@@ -34,8 +34,10 @@ function unify_dash(string $text): string
 
 function split_to_rows(string $text): array
 {
+    $text = \trim($text);
     $text = preg_replace('~-[\n\r]+((?![\n\r])\s)*([[:lower:]])~u', '$1', $text);
-    $text = preg_replace('~\s*[\n\r]\s*([^[:upper:]])~u', ' $1', $text);
+
+//    $text = preg_replace('~\s*[\n\r]+\s*([^[:upper:]])~u', ' $1', $text);
 
     return preg_split("~[\r\n]+~", $text, -1, PREG_SPLIT_NO_EMPTY);
 }
@@ -45,17 +47,17 @@ function format_2k6_plus(string $text): string
     return preg_replace('~2k6\+\s*~', '2k6<span class="upper-index">+</span>', $text);
 }
 
-function split_to_header_cells(string $row)
+function split_to_header_cells(string $row): array
 {
     return split_to_cells($row, 'th');
 }
 
-function split_to_body_cells(string $row)
+function split_to_body_cells(string $row): array
 {
     return split_to_cells($row, 'td');
 }
 
-function split_to_cells(string $row, string $wrappingTag)
+function split_to_cells(string $row, string $wrappingTag): array
 {
     $parts = preg_split('~\s~', $row, -1, PREG_SPLIT_NO_EMPTY);
     $cellContent = [];
@@ -75,7 +77,7 @@ function split_to_cells(string $row, string $wrappingTag)
     return $cells;
 }
 
-function join_to_table_rows(array $rows)
+function join_to_table_rows(array $rows): string
 {
     return implode(
         "\n",
