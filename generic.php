@@ -104,3 +104,20 @@ function join_rows(string $text): string
 
     return $joined;
 }
+
+function fix_content(string $content)
+{
+    return fix_rows(unify_dash(unify_space($content)));
+}
+
+function unify_space(string $content): string
+{
+    return str_replace('	' /* ord 9 */, ' ' /* space */, $content);
+}
+
+function fix_rows(string $content): string
+{
+    $content = preg_replace('~-[\n\r]+\s*~', '', $content);
+
+    return preg_replace('~[\n\r]+\s*(y|ý)~u', '$1', $content);
+}

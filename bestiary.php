@@ -1,12 +1,16 @@
 <?php
+include_once __DIR__ . '/generic.php';
+
 function format_creature(string $creature): string
 {
-    $creature = str_replace(['−', '	' /* ord 9 */], ['-', ' ' /* space */], $creature);
+    $creature = fix_content($creature);
     $creature = preg_replace('~(\s)\s+~', '$1', $creature);
     preg_match('~^(?<title>\w+)[\n\r]+(?<parameters>.+)(?<description>Popis:.+)$~us', $creature, $matches);
 
-    return "<h3 id='{$matches['title']}'>{$matches['title']}</h3>\n\n" . creature_to_table($matches['parameters'])
-        . "\n\n" . creature_description($matches['description'], $matches['title']);
+    return "<h3 id='{$matches['title']}'>{$matches['title']}</h3>\n\n"
+        . '<img src="images/123.png" class="float-right">' . "\n\n"
+        . creature_to_table($matches['parameters']) . "\n\n"
+        . creature_description($matches['description'], $matches['title']);
 }
 
 function creature_to_table(string $creature): string
@@ -20,6 +24,7 @@ function creature_to_table(string $creature): string
             continue;
         }
         $parameterName = substr($rawRow, 0, strpos($rawRow, ':'));
+        $cells = [];
         $cells[] = $parameterName . ':';
         $cells[] = substr($rawRow, strpos($rawRow, ':') + 1);
         $rows[] = matches_to_cells($cells);
@@ -66,14 +71,17 @@ function creature_description(string $description, string $mainTitle): string
         if ($row !== '') {
             if ($firstRowAfterTitle) {
                 if ($descriptionTitle === 'Setkání') {
-                    $part .= '<div class="introduction">';
+                    $part .= '<div class="introduction">' . "\n";
                 } else {
-                    $part .= '<div>';
+                    $part .= "<div>\n";
                 }
             }
             $part .= $row . "\n";
             $firstRowAfterTitle = false;
         }
+    }
+    if ($part !== '') {
+        $parts[] = $part . "</div>\n"; // last one
     }
 
     return implode("\n", $parts);
