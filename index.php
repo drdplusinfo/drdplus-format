@@ -132,10 +132,10 @@ if (!empty($_GET['table'])) {
     </label>
 <?php } elseif (!empty($_POST['bestiary'])) {
     require_once __DIR__ . '/bestiary.php';
-    $thiefCombatParameters = format_creature($_POST['bestiary']);
+    $creature = format_creature($_POST['bestiary']);
     ?>
     <label>tabulka<br>
-        <textarea rows="9" cols="70" id="result"><?= $thiefCombatParameters ?></textarea>
+        <textarea rows="9" cols="70" id="result"><?= $creature ?></textarea>
     </label>
 <?php } ?>
 <script type="text/javascript">

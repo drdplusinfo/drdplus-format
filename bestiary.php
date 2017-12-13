@@ -52,6 +52,7 @@ HTML
 
 function creature_description(string $description, string $mainTitle): string
 {
+    $description = preg_replace('~:\s*[\r\n]+~', ': ', $description); // sometimes are titles on new lines, we want them single-lined
     $rows = preg_split('~[\r\n]+~', $description);
     $parts = [];
     $part = '';
