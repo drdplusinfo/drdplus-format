@@ -4,8 +4,9 @@ include_once __DIR__ . '/generic.php';
 function format_creature(string $creature): string
 {
     $creature = fix_content($creature);
+    $creature = format_2k6_plus($creature);
     $creature = preg_replace('~(\s)\s+~', '$1', $creature);
-    preg_match('~^(?<title>\w+)[\n\r]+(?<parameters>.+)(?<description>Popis:.+)$~us', $creature, $matches);
+    preg_match('~^(?<title>[\w ]+)[\n\r]+(?<parameters>.+)(?<description>Popis:.+)$~us', $creature, $matches);
 
     return "<h3 id='{$matches['title']}'>{$matches['title']}</h3>\n\n"
         . '<img src="images/123.png" class="float-right">' . "\n\n"
@@ -70,7 +71,7 @@ function creature_description(string $description, string $mainTitle): string
         $row = trim($row);
         if ($row !== '') {
             if ($firstRowAfterTitle) {
-                if ($descriptionTitle === 'Setkání') {
+                if (strpos($descriptionTitle, 'Setkání') === 0) {
                     $part .= '<div class="introduction">' . "\n";
                 } else {
                     $part .= "<div>\n";
@@ -83,8 +84,44 @@ function creature_description(string $description, string $mainTitle): string
     if ($part !== '') {
         $parts[] = $part . "</div>\n"; // last one
     }
+    foreach ($parts as &$part) {
+        $part = detect_paragraphs($part) . "\n";
+    }
 
     return implode("\n", $parts);
+}
+
+function detect_paragraphs(string $content): string
+{
+    $rows = explode("\n", $content);
+    $previousEndsByDot = false;
+    $paragraph = '';
+    $rowsWithParagraphs = [];
+    foreach ($rows as $row) {
+        if ($row === '') {
+            continue;
+        }
+        if ($paragraph !== '' && preg_match('~^</\w+>~u', $row)) { // HTML tag
+            $rowsWithParagraphs[] = $paragraph . "\n</p>"; // end of paragraph;
+            $paragraph = '';
+        }
+        if ($previousEndsByDot && preg_match('~^[[:upper:]]~u', $row)) {
+            if ($paragraph !== '') {
+                $rowsWithParagraphs[] = $paragraph . "\n</p>"; // end of paragraph;
+            }
+            $paragraph = "<p>\n" . $row; // start of paragraph
+        } elseif ($paragraph !== '') { // continue of paragraph
+            $paragraph .= $row . "\n";
+        } else {
+            $rowsWithParagraphs[] = $row; // out of paragraph
+        }
+        $previousEndsByDot = (bool)preg_match('~[.]$~', $row);
+    }
+    if ($paragraph !== '') {
+        $rowsWithParagraphs[] = $paragraph . "\n</p>"; // end of paragraph;
+    }
+
+    return implode("\n", $rowsWithParagraphs);
 }
 
 function matches_to_cells(array $matches, array $collSpans = [])
