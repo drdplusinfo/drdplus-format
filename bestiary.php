@@ -59,7 +59,7 @@ function creature_description(string $description, string $mainTitle): string
     $firstRowAfterTitle = false;
     $descriptionTitle = '';
     foreach ($rows as $row) {
-        if (strpos($row, ':') > 0) { // new block
+        if (preg_match('~^\w+(\s+\w+)?:~u', $row)) { // new block
             if ($part !== '') { // finishing previous block
                 $parts[] = $part . "</div>\n";
                 $part = '';
@@ -76,6 +76,9 @@ function creature_description(string $description, string $mainTitle): string
                     $part .= '<div class="introduction">' . "\n";
                 } else {
                     $part .= "<div>\n";
+                    if ($descriptionTitle === 'Zvláštní vlastnosti') {
+                        $row = preg_replace('~^([^:]+)(.*)$~', '<p><span class="keyword">$1</span>$2</p>', $row);
+                    }
                 }
             }
             $part .= $row . "\n";
@@ -95,7 +98,7 @@ function creature_description(string $description, string $mainTitle): string
 function detect_paragraphs(string $content): string
 {
     $rows = explode("\n", $content);
-    $previousEndsByDot = false;
+    $previousIsEndOfSentence = false;
     $paragraph = '';
     $rowsWithParagraphs = [];
     foreach ($rows as $row) {
@@ -103,10 +106,10 @@ function detect_paragraphs(string $content): string
             continue;
         }
         if ($paragraph !== '' && preg_match('~^</\w+>~u', $row)) { // HTML tag
-            $rowsWithParagraphs[] = $paragraph . "\n</p>"; // end of paragraph;
+            $rowsWithParagraphs[] = trim($paragraph) . "\n</p>"; // end of paragraph;
             $paragraph = '';
         }
-        if ($previousEndsByDot && preg_match('~^[[:upper:]]~u', $row)) {
+        if ($previousIsEndOfSentence && preg_match('~^[[:upper:]„]~u', $row)) {
             if ($paragraph !== '') {
                 $rowsWithParagraphs[] = $paragraph . "\n</p>"; // end of paragraph;
             }
@@ -116,10 +119,10 @@ function detect_paragraphs(string $content): string
         } else {
             $rowsWithParagraphs[] = $row; // out of paragraph
         }
-        $previousEndsByDot = (bool)preg_match('~[.]$~', $row);
+        $previousIsEndOfSentence = (bool)preg_match('~[.!“]$~u', $row);
     }
     if ($paragraph !== '') {
-        $rowsWithParagraphs[] = $paragraph . "\n</p>"; // end of paragraph;
+        $rowsWithParagraphs[] = trim($paragraph) . "\n</p>"; // end of paragraph;
     }
 
     return implode("\n", $rowsWithParagraphs);
