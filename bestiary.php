@@ -8,9 +8,9 @@ function format_creature(string $creature): string
     $creature = preg_replace('~(\s)\s+~', '$1', $creature);
     preg_match('~^(?<title>[\w ]+)[\n\r]+(?<parameters>.+)(?<description>Popis:.+)$~us', $creature, $matches);
 
-    return "<h3 id='{$matches['title']}'>{$matches['title']}</h3>\n\n"
+    return "<h3 id=\"{$matches['title']}\">{$matches['title']}</h3>\n\n"
         . '<img src="images/123.png" class="float-right">' . "\n\n"
-        . creature_to_table($matches['parameters']) . "\n\n"
+        . creature_to_table($matches['parameters']) . "\n"
         . creature_description($matches['description'], $matches['title']);
 }
 
@@ -53,46 +53,50 @@ HTML
 function creature_description(string $description, string $mainTitle): string
 {
     $description = preg_replace('~:\s*[\r\n]+~', ': ', $description); // sometimes are titles on new lines, we want them single-lined
-    $rows = preg_split('~[\r\n]+~', $description);
-    $parts = [];
-    $part = '';
-    $firstRowAfterTitle = false;
-    $descriptionTitle = '';
-    foreach ($rows as $row) {
-        if (preg_match('~^\w+(\s+\w+)?:~u', $row)) { // new block
-            if ($part !== '') { // finishing previous block
-                $parts[] = $part . "</div>\n";
-                $part = '';
-            }
-            $descriptionTitle = substr($row, 0, strpos($row, ':'));
-            $part .= "<h5 id='$descriptionTitle $mainTitle'>$descriptionTitle</h5>\n";
-            $row = substr($row, strpos($row, ':') + 1);
-            $firstRowAfterTitle = true;
-        }
-        $row = trim($row);
-        if ($row !== '') {
-            if ($firstRowAfterTitle) {
-                if (strpos($descriptionTitle, 'Setkání') === 0) {
-                    $part .= '<div class="introduction">' . "\n";
-                } else {
-                    $part .= "<div>\n";
-                    if ($descriptionTitle === 'Zvláštní vlastnosti') {
-                        $row = preg_replace('~^([^:]+)(.*)$~', '<p><span class="keyword">$1</span>$2</p>', $row);
-                    }
+    $blocks = preg_split('~(Popis|Výskyt|Chování|Setkání|Boj|Zvláštní vlastnosti):~u', $description, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+    $formattedDescription = '';
+    for ($blockTitleIndex = 0, $blockIndex = 1, $blocksCount = count($blocks); $blockIndex < $blocksCount; $blockTitleIndex += 2, $blockIndex += 2) {
+        $blockTitle = $blocks[$blockTitleIndex];
+        $block = $blocks[$blockIndex];
+        $rows = preg_split('~[\r\n]+~', $block, -1, PREG_SPLIT_NO_EMPTY);
+        $parts = ["<h5 id=\"$blockTitle $mainTitle\">$blockTitle</h5>"];
+        $part = '';
+        $firstRowAfterTitle = true;
+        foreach ($rows as $row) {
+            if (preg_match('~^\w+(\s+\w+)?:~u', $row)) { // new sub-block
+                if ($part !== '') { // finishing previous sub-block
+                    $parts[] = $part . "</div>\n";
+                    $part = '';
                 }
             }
-            $part .= $row . "\n";
-            $firstRowAfterTitle = false;
+            $row = trim($row);
+            if ($row !== '') {
+                if ($firstRowAfterTitle) {
+                    if (strpos($blockTitle, 'Setkání') === 0) {
+                        $part .= '<div class="introduction">' . "\n";
+                    } else {
+                        $part .= "<div>\n";
+                        if ($blockTitle === 'Zvláštní vlastnosti') {
+                            $row = preg_replace('~^([^:]+)(.*)$~', '<p><span class="keyword" id="$1 ' . $mainTitle . '">$1</span>$2</p>', $row);
+                        }
+                    }
+                }
+                $part .= $row . "\n";
+                $firstRowAfterTitle = false;
+            }
         }
-    }
-    if ($part !== '') {
-        $parts[] = $part . "</div>\n"; // last one
-    }
-    foreach ($parts as &$part) {
-        $part = detect_paragraphs($part) . "\n";
+        if ($part !== '') {
+            $parts[] = $part . "</div>\n"; // last one
+        }
+        foreach ($parts as &$part) {
+            $part = detect_paragraphs($part);
+        }
+        unset($part);
+
+        $formattedDescription .= "\n" . implode("\n", $parts) . "\n";
     }
 
-    return implode("\n", $parts);
+    return $formattedDescription;
 }
 
 function detect_paragraphs(string $content): string
@@ -111,7 +115,7 @@ function detect_paragraphs(string $content): string
         }
         if ($previousIsEndOfSentence && preg_match('~^[[:upper:]„]~u', $row)) {
             if ($paragraph !== '') {
-                $rowsWithParagraphs[] = $paragraph . "\n</p>"; // end of paragraph;
+                $rowsWithParagraphs[] = trim($paragraph) . "\n</p>"; // end of paragraph;
             }
             $paragraph = "<p>\n" . $row; // start of paragraph
         } elseif ($paragraph !== '') { // continue of paragraph
