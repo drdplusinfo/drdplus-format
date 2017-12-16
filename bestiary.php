@@ -89,7 +89,7 @@ function creature_description(string $description, string $mainTitle): string
             $parts[] = $part . "</div>\n"; // last one
         }
         foreach ($parts as &$part) {
-            $part = detect_paragraphs($part);
+            $part = add_paragraphs($part);
         }
         unset($part);
 
@@ -97,39 +97,6 @@ function creature_description(string $description, string $mainTitle): string
     }
 
     return $formattedDescription;
-}
-
-function detect_paragraphs(string $content): string
-{
-    $rows = explode("\n", $content);
-    $previousIsEndOfSentence = false;
-    $paragraph = '';
-    $rowsWithParagraphs = [];
-    foreach ($rows as $row) {
-        if ($row === '') {
-            continue;
-        }
-        if ($paragraph !== '' && preg_match('~^</\w+>~u', $row)) { // HTML tag
-            $rowsWithParagraphs[] = trim($paragraph) . "\n</p>"; // end of paragraph;
-            $paragraph = '';
-        }
-        if ($previousIsEndOfSentence && preg_match('~^[[:upper:]„]~u', $row)) {
-            if ($paragraph !== '') {
-                $rowsWithParagraphs[] = trim($paragraph) . "\n</p>"; // end of paragraph;
-            }
-            $paragraph = "<p>\n" . $row; // start of paragraph
-        } elseif ($paragraph !== '') { // continue of paragraph
-            $paragraph .= $row . "\n";
-        } else {
-            $rowsWithParagraphs[] = $row; // out of paragraph
-        }
-        $previousIsEndOfSentence = (bool)preg_match('~[.!“]$~u', $row);
-    }
-    if ($paragraph !== '') {
-        $rowsWithParagraphs[] = trim($paragraph) . "\n</p>"; // end of paragraph;
-    }
-
-    return implode("\n", $rowsWithParagraphs);
 }
 
 function matches_to_cells(array $matches, array $collSpans = [])

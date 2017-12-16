@@ -22,28 +22,28 @@
 <body>
 <form>
     <label>Tabulka<br>
-        <textarea rows="10" cols="50" name="table" class="generic"></textarea>
+        <textarea rows="5" cols="50" name="table" class="generic"></textarea>
     </label>
     <br>
     <input type="submit" value="Odeslat">
 </form>
 <form>
     <label>Kouzlo čaroděje<br>
-        <textarea rows="10" cols="50" name="wizard_spell" class="wizard"></textarea>
+        <textarea rows="5" cols="50" name="wizard_spell" class="wizard"></textarea>
     </label>
     <br>
     <input type="submit" value="Odeslat">
 </form>
 <form method="post">
     <label>Kouzla z abecedního seznamu<br>
-        <textarea rows="10" cols="50" name="wizard_spells_from_table_of_content" class="wizard"></textarea>
+        <textarea rows="5" cols="50" name="wizard_spells_from_table_of_content" class="wizard"></textarea>
     </label>
     <br>
     <input type="submit" value="Odeslat">
 </form>
 <form>
     <label>Bojové parametry kouzla<br>
-        <textarea rows="10" cols="50" name="wizard_spell_combat_properties" class="wizard"></textarea>
+        <textarea rows="5" cols="50" name="wizard_spell_combat_properties" class="wizard"></textarea>
     </label>
     <br>
     <input type="submit" value="Odeslat">
@@ -51,28 +51,36 @@
 <div class="clear"></div>
 <form>
     <label>Zlodějova schopnost<br>
-        <textarea rows="10" cols="50" name="thief_skill_properties" class="thief"></textarea>
+        <textarea rows="5" cols="50" name="thief_skill_properties" class="thief"></textarea>
     </label>
     <br>
     <input type="submit" value="Odeslat">
 </form>
 <form>
     <label>Rozšířený hod na úspěch<br>
-        <textarea rows="10" cols="50" name="extended_roll_on_success" class="thief"></textarea>
+        <textarea rows="5" cols="50" name="extended_roll_on_success" class="thief"></textarea>
     </label>
     <br>
     <input type="submit" value="Odeslat">
 </form>
 <form>
     <label>Bojová dovednost zloděje<br>
-        <textarea rows="10" cols="50" name="thief_combat_parameters" class="thief"></textarea>
+        <textarea rows="5" cols="50" name="thief_combat_parameters" class="thief"></textarea>
     </label>
     <br>
     <input type="submit" value="Odeslat">
 </form>
 <form method="post">
     <label>Příšera<br>
-        <textarea rows="10" cols="50" name="bestiary" class="bestiary"></textarea>
+        <textarea rows="5" cols="50" name="bestiary" class="bestiary"></textarea>
+    </label>
+    <br>
+    <input type="submit" value="Odeslat">
+</form>
+<div class="clear"></div>
+<form method="post">
+    <label>Text<br>
+        <textarea rows="5" cols="50" name="text" class="text"></textarea>
     </label>
     <br>
     <input type="submit" value="Odeslat">
@@ -135,7 +143,14 @@ if (!empty($_GET['table'])) {
     $creature = format_creature($_POST['bestiary']);
     ?>
     <label>tabulka<br>
-        <textarea rows="9" cols="70" id="result"><?= $creature ?></textarea>
+        <textarea rows="20" cols="150" id="result"><?= $creature ?></textarea>
+    </label>
+<?php } elseif (!empty($_POST['text'])) {
+    require_once __DIR__ . '/text.php';
+    $text = format_text($_POST['text']);
+    ?>
+    <label>tabulka<br>
+        <textarea rows="20" cols="150" id="result"><?= $text ?></textarea>
     </label>
 <?php } ?>
 <script type="text/javascript">

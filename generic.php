@@ -107,7 +107,7 @@ function join_rows(string $text): string
 
 function fix_content(string $content)
 {
-    return fix_rows(unify_dash(unify_space($content)));
+    return fix_title(fix_rows(unify_dash(unify_space(unify_new_lines($content)))));
 }
 
 function unify_space(string $content): string
@@ -115,9 +115,98 @@ function unify_space(string $content): string
     return str_replace('	' /* ord 9 */, ' ' /* space */, $content);
 }
 
+function unify_new_lines(string $content): string
+{
+    return str_replace("\r\n", "\n", $content);
+}
+
 function fix_rows(string $content): string
 {
-    $content = preg_replace('~-[\n\r]+\s*~', '', $content);
+    $delimitedRowsConcatenated = preg_replace('~-[\n\r]+\s*~', '', $content);
+    $upsilonsConcatenated = preg_replace('~[\n\r]+\s*(y|ý)~u', '$1', $delimitedRowsConcatenated);
 
-    return preg_replace('~[\n\r]+\s*(y|ý)~u', '$1', $content);
+    return preg_replace('~=\s+=~', '=', $upsilonsConcatenated);
+}
+
+function fix_title(string $content): string
+{
+    // D raci = Draci
+    return preg_replace('~^([[:upper:]]) ([[:lower:]])~u', '$1$2', $content);
+}
+
+function add_divs(string $content): string
+{
+    $blocks = preg_split(
+        '~(?:^|\s+)([[:upper:]][[:lower:]]+(?:\s+[[:lower:]]+)?)[\r\n]+~u',
+        $content,
+        -1,
+        PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY
+    );
+    if (count($blocks) < 2) {
+        return $content;
+    }
+    $formatted = '';
+    for ($blockTitleIndex = 0, $blockIndex = 1, $blocksCount = count($blocks); $blockIndex < $blocksCount; $blockTitleIndex += 2, $blockIndex += 2) {
+        $blockTitle = $blocks[$blockTitleIndex];
+        $block = $blocks[$blockIndex];
+        $rows = preg_split('~[\r\n]+~', $block, -1, PREG_SPLIT_NO_EMPTY);
+        $parts = ["<h3 id=\"$blockTitle\">$blockTitle</h3>"];
+        $part = '';
+        $firstRowAfterTitle = true;
+        foreach ($rows as $row) {
+            if (preg_match('~^\w+(\s+\w+)?:~u', $row)) { // new sub-block
+                if ($part !== '') { // finishing previous sub-block
+                    $parts[] = $part . "</div>\n";
+                    $part = '';
+                }
+            }
+            $row = trim($row);
+            if ($row !== '') {
+                if ($firstRowAfterTitle) {
+                    $part .= "<div>\n";
+                }
+                $part .= $row . "\n";
+                $firstRowAfterTitle = false;
+            }
+        }
+        if ($part !== '') {
+            $parts[] = $part . "</div>\n"; // last one
+        }
+        $formatted .= implode("\n", $parts) . "\n";
+    }
+
+    return $formatted;
+}
+
+function add_paragraphs(string $content): string
+{
+    $rows = explode("\n", $content);
+    $previousIsEndOfSentence = false;
+    $paragraph = '';
+    $rowsWithParagraphs = [];
+    foreach ($rows as $row) {
+        if ($row === '') {
+            continue;
+        }
+        if ($paragraph !== '' && preg_match('~^</\w+>~u', $row)) { // HTML tag
+            $rowsWithParagraphs[] = trim($paragraph) . "\n</p>"; // end of paragraph;
+            $paragraph = '';
+        }
+        if ($previousIsEndOfSentence && preg_match('~^[[:upper:]„]~u', $row)) {
+            if ($paragraph !== '') {
+                $rowsWithParagraphs[] = trim($paragraph) . "\n</p>"; // end of paragraph;
+            }
+            $paragraph = "<p>\n" . $row; // start of paragraph
+        } elseif ($paragraph !== '') { // continue of paragraph
+            $paragraph .= $row . "\n";
+        } else {
+            $rowsWithParagraphs[] = $row; // out of paragraph
+        }
+        $previousIsEndOfSentence = (bool)preg_match('~[.!“)]$~u', $row);
+    }
+    if ($paragraph !== '') {
+        $rowsWithParagraphs[] = trim($paragraph) . "\n</p>"; // end of paragraph;
+    }
+
+    return implode("\n", $rowsWithParagraphs);
 }
