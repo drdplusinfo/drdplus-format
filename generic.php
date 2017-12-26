@@ -137,7 +137,7 @@ function fix_title(string $content): string
 function add_divs(string $content): string
 {
     $blocks = preg_split(
-        '~(?:^|\s+)([[:upper:]][[:lower:]]+(?:\s+[[:lower:]]+)?)[\r\n]+~u',
+        '~(?:^|\s+)([[:upper:]][[:lower:]]+(?:\s+s)?(?:\s+[[:lower:]]+)?)[\r\n]+~u',
         $content,
         -1,
         PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY
