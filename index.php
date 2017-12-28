@@ -149,7 +149,7 @@ if (!empty($_GET['table'])) {
     require_once __DIR__ . '/text.php';
     $text = format_text($_POST['text']);
     ?>
-    <label>tabulka<br>
+    <label>formátovaný text<br>
         <textarea rows="20" cols="150" id="result"><?= $text ?></textarea>
     </label>
 <?php } ?>

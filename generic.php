@@ -134,10 +134,10 @@ function fix_title(string $content): string
     return preg_replace('~^([[:upper:]]) ([[:lower:]])~u', '$1$2', $content);
 }
 
-function add_divs(string $content): string
+function add_divs_and_headings(string $content): string
 {
     $blocks = preg_split(
-        '~(?:^|\s+)([[:upper:]][[:lower:]]+(?:\s+s)?(?:\s+[[:lower:]]+)?)[\r\n]+~u',
+        '~(?:^|\s+)([[:upper:]][[:lower:]]+(?:\s+s)?(?:\s+[[:lower:]]+)+)[\r\n]+~u',
         $content,
         -1,
         PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY
