@@ -26,7 +26,7 @@ function creature_to_table(string $creature): string
         }
         $parameterName = substr($rawRow, 0, strpos($rawRow, ':'));
         $cells = [];
-        $cells[] = $parameterName . ':';
+        $cells[] = $parameterName . ($parameterName !== '' ? ':' : '');
         $cells[] = substr($rawRow, strpos($rawRow, ':') + 1);
         $rows[] = matches_to_cells($cells);
     }
