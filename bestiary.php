@@ -5,7 +5,7 @@ function format_creature(string $creature): string
 {
     $creature = fix_content($creature);
     $creature = format_2k6_plus($creature);
-    $creature = preg_replace('~(\s)\s+~', '$1', $creature);
+    $creature = preg_replace('~ +[\n\r]~', "\n", $creature);
     preg_match('~^(?<title>[\w ]+)[\n\r]+(?<parameters>.+)(?<description>Popis:.+)$~us', $creature, $matches);
 
     return "<h3 id=\"{$matches['title']}\">{$matches['title']}</h3>\n\n"
