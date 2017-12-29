@@ -68,7 +68,7 @@ function creature_description(string $description, string $mainTitle): string
                     $part = '';
                 }
             }
-            $row = trim($row);
+            $row = ltrim($row);
             if ($row !== '') {
                 if ($firstRowAfterTitle) {
                     if (strpos($blockTitle, 'Setkání') === 0) {
