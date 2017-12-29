@@ -61,6 +61,7 @@ function creature_description(string $description, string $mainTitle): string
         $parts = ["<h5 id=\"$blockTitle $mainTitle\">$blockTitle</h5>"];
         $part = '';
         $firstRowAfterTitle = true;
+        $ability = '';
         foreach ($rows as $row) {
             if (preg_match('~^\w+(\s+\w+)?:~u', $row)) { // new sub-block
                 if ($part !== '') { // finishing previous sub-block
@@ -75,14 +76,31 @@ function creature_description(string $description, string $mainTitle): string
                         $part .= '<div class="introduction">' . "\n";
                     } else {
                         $part .= "<div>\n";
-                        if ($blockTitle === 'Zvláštní vlastnosti') {
-                            $row = preg_replace('~^([^:]+)(.*)$~', '<p><span class="keyword" id="$1 ' . $mainTitle . '">$1</span>$2</p>', $row);
-                        }
                     }
                 }
-                $part .= $row . "\n";
+                if ($blockTitle === 'Zvláštní vlastnosti') {
+                    if (preg_match('~[^:]+:\s*[^-+\d\s]~', $row)) { // new ability (not a property value)
+                        $previousAbility = $ability;
+                        [$row, $ability] = explode(':', $row);
+                        $row = '<p><span class="keyword" id="' . $row . ' ' . $mainTitle . '">' . $row . '</span>: ';
+                        if ($previousAbility !== '') {
+                            $row = $previousAbility . "</p>\n" . $row; // finishing previous ability as new one appears
+                        }
+                    } else {
+                        $ability .= $row;
+                        $row = false; // row has been consumed
+                    }
+                } elseif ($ability !== '') { // some ability has been collected from previous special abilities block
+                    $row .= "$ability</p>";
+                }
+                if ($row !== false) {
+                    $part .= $row . "\n";
+                }
                 $firstRowAfterTitle = false;
             }
+        }
+        if ($ability !== '') { // some ability has been collected from previous special abilities block
+            $part .= "$ability</p>";
         }
         if ($part !== '') {
             $parts[] = $part . "</div>\n"; // last one
