@@ -5,8 +5,7 @@ function format_creature(string $creature): string
 {
     $creature = fix_content($creature);
     $creature = format_2k6_plus($creature);
-    $creature = preg_replace('~ +[\n\r]~', "\n", $creature);
-    preg_match('~^(?<title>[\w ]+)[\n\r]+(?<parameters>.+)(?<description>Popis:.+)$~us', $creature, $matches);
+    preg_match('~^(?<title>[\w –]+)[\n\r]+(?<parameters>.+)(?<description>Popis:.+)$~us', $creature, $matches);
 
     return "<h3 id=\"{$matches['title']}\">{$matches['title']}</h3>\n\n"
         . '<img src="images/123.png" class="float-right">' . "\n\n"
@@ -27,7 +26,7 @@ function creature_to_table(string $creature): string
         $parameterName = substr($rawRow, 0, strpos($rawRow, ':'));
         $cells = [];
         $cells[] = $parameterName . ($parameterName !== '' ? ':' : '');
-        $cells[] = substr($rawRow, strpos($rawRow, ':') + 1);
+        $cells[] = $parameterName !== '' ? substr($rawRow, strpos($rawRow, ':') + 1) : $rawRow;
         $rows[] = matches_to_cells($cells);
     }
     $tableContent = implode(
@@ -53,7 +52,7 @@ HTML
 function creature_description(string $description, string $mainTitle): string
 {
     $description = preg_replace('~:\s*[\r\n]+~', ': ', $description); // sometimes are titles on new lines, we want them single-lined
-    $blocks = preg_split('~(Popis|Výskyt|Chování|Setkání|Boj|Zvláštní vlastnosti):~u', $description, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+    $blocks = preg_split('~(Popis|Výskyt|Chování|Setkání(?:\s+I+)?|Boj|Zvláštní vlastnosti):~u', $description, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
     $formattedDescription = '';
     for ($blockTitleIndex = 0, $blockIndex = 1, $blocksCount = count($blocks); $blockIndex < $blocksCount; $blockTitleIndex += 2, $blockIndex += 2) {
         $blockTitle = $blocks[$blockTitleIndex];
