@@ -124,8 +124,9 @@ function fix_rows(string $content): string
 {
     $delimitedRowsConcatenated = preg_replace('~-[\n\r]+\s*~', '', $content);
     $upsilonsConcatenated = preg_replace('~[\n\r]+\s*(y|ý)~u', '$1', $delimitedRowsConcatenated);
+    $efConcatenated = preg_replace('~[\n\r]+\s*(f|fa|fě|fou|fu|fovi) ~u', '$1 ', $upsilonsConcatenated);
 
-    return preg_replace('~=\s+=~', '=', $upsilonsConcatenated);
+    return preg_replace('~=\s+=~', '=', $efConcatenated);
 }
 
 function fix_title(string $content): string
@@ -137,7 +138,7 @@ function fix_title(string $content): string
 function add_divs_and_headings(string $content): string
 {
     $blocks = preg_split(
-        '~(?:^|\s+)([[:upper:]][[:lower:]]+(?:\s+s)?(?:\s+[[:lower:]]+)+)[\r\n]+~u',
+        '~(?:^|\s+)([[:upper:]][[:lower:]]+(?:\s+s)?(?:\s+[[:lower:]]+)*)[\r\n]+~u',
         $content,
         -1,
         PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY
@@ -150,7 +151,7 @@ function add_divs_and_headings(string $content): string
         $blockTitle = $blocks[$blockTitleIndex];
         $block = $blocks[$blockIndex];
         $rows = preg_split('~[\r\n]+~', $block, -1, PREG_SPLIT_NO_EMPTY);
-        $parts = ["<h3 id=\"$blockTitle\">$blockTitle</h3>"];
+        $parts = ["\n<h3 id=\"$blockTitle\">$blockTitle</h3>"];
         $part = '';
         $firstRowAfterTitle = true;
         foreach ($rows as $row) {
@@ -196,7 +197,7 @@ function add_paragraphs(string $content): string
             if ($paragraph !== '') {
                 $rowsWithParagraphs[] = trim($paragraph) . "\n</p>"; // end of paragraph;
             }
-            $paragraph = "<p>\n" . $row; // start of paragraph
+            $paragraph = "<p>\n" . $row . "\n"; // start of paragraph
         } elseif ($paragraph !== '') { // continue of paragraph
             $paragraph .= $row . "\n";
         } else {

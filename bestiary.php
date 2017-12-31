@@ -63,11 +63,9 @@ function creature_description(string $description, string $mainTitle): string
         $firstRowAfterTitle = true;
         $ability = '';
         foreach ($rows as $row) {
-            if (preg_match('~^\w+(\s+\w+)?:~u', $row)) { // new sub-block
-                if ($part !== '') { // finishing previous sub-block
-                    $parts[] = $part . "</div>\n";
-                    $part = '';
-                }
+            if ($blockTitle !== 'Zvláštní vlastnosti' && $part !== '' && preg_match('~^\w+(\s+\w+)?:~u', $row)) { // new sub-block
+                $parts[] = $part . "</div>\n";// finishing previous sub-block
+                $part = '';
             }
             $row = ltrim($row);
             if ($row !== '') {
@@ -79,7 +77,7 @@ function creature_description(string $description, string $mainTitle): string
                     }
                 }
                 if ($blockTitle === 'Zvláštní vlastnosti') {
-                    if (preg_match('~[^:]+:\s*[^-+\d\s]~', $row)) { // new ability (not a property value)
+                    if (preg_match('~[^:]+: *([^-+\d\s\n])~', $row)) { // new ability (not a property value)
                         $previousAbility = $ability;
                         [$row, $ability] = explode(':', $row);
                         $row = '<p><span class="keyword" id="' . $row . ' ' . $mainTitle . '">' . $row . '</span>: ';
