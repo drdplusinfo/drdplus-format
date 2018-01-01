@@ -138,7 +138,7 @@ function fix_title(string $content): string
 function add_divs_and_headings(string $content): string
 {
     $blocks = preg_split(
-        '~(?:^|\s+)([[:upper:]][[:lower:]]+(?:\s+s)?(?:\s+[[:lower:]]+)*)[\r\n]+~u',
+        '~(?:^|\s+)([[:upper:]][[:lower:]]+(?:\s+s)?(?:\s+[[:lower:]]+)*[?]?)[\r\n]+~u',
         $content,
         -1,
         PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY
@@ -151,7 +151,7 @@ function add_divs_and_headings(string $content): string
         $blockTitle = $blocks[$blockTitleIndex];
         $block = $blocks[$blockIndex];
         $rows = preg_split('~[\r\n]+~', $block, -1, PREG_SPLIT_NO_EMPTY);
-        $parts = ["\n<h3 id=\"$blockTitle\">$blockTitle</h3>"];
+        $parts = ["<h3 id=\"$blockTitle\">$blockTitle</h3>"];
         $part = '';
         $firstRowAfterTitle = true;
         foreach ($rows as $row) {
@@ -176,7 +176,10 @@ function add_divs_and_headings(string $content): string
         $formatted .= implode("\n", $parts) . "\n";
     }
 
-    return $formatted;
+    return str_replace('</div>
+<h3 ', '</div>
+
+<h3', $formatted);
 }
 
 function add_paragraphs(string $content): string
@@ -203,7 +206,7 @@ function add_paragraphs(string $content): string
         } else {
             $rowsWithParagraphs[] = $row; // out of paragraph
         }
-        $previousIsEndOfSentence = (bool)preg_match('~[.!“)]$~u', $row);
+        $previousIsEndOfSentence = (bool)preg_match('~[.!“)?]\s*$~u', $row);
     }
     if ($paragraph !== '') {
         $rowsWithParagraphs[] = trim($paragraph) . "\n</p>"; // end of paragraph;

@@ -8,7 +8,7 @@ function format_creature(string $creature): string
     preg_match('~^(?<title>[\w –]+)[\n\r]+(?<parameters>.+)(?<description>Popis:.+)$~us', $creature, $matches);
 
     return "<h3 id=\"{$matches['title']}\">{$matches['title']}</h3>\n\n"
-        . '<img src="images/123.png" class="float-right">' . "\n\n"
+        . '<img src="images/999.png" class="float-right">' . "\n\n"
         . creature_to_table($matches['parameters']) . "\n"
         . creature_description($matches['description'], $matches['title']);
 }
@@ -77,14 +77,20 @@ function creature_description(string $description, string $mainTitle): string
                     }
                 }
                 if ($blockTitle === 'Zvláštní vlastnosti') {
-                    if (preg_match('~[^:]+: *([^-+\d\s\n])~', $row)) { // new ability (not a property value)
+                    if (preg_match('~^[[:upper:]][[:lower:]]+(?: [[:lower:]]+){0,3}: *([^-+\d\s\n])~u', $row)) { // new ability (not a property value)
                         $previousAbility = $ability;
-                        [$row, $ability] = explode(':', $row);
+                        $rowParts = explode(':', $row);
+                        $row = $rowParts[0];
+                        unset($rowParts[0]);
+                        $ability = implode(':', $rowParts);
                         $row = '<p><span class="keyword" id="' . $row . ' ' . $mainTitle . '">' . $row . '</span>: ';
                         if ($previousAbility !== '') {
                             $row = $previousAbility . "</p>\n" . $row; // finishing previous ability as new one appears
                         }
                     } else {
+                        if (preg_match('~[.:\d]$~', $ability) && preg_match('~^[[:upper:]]~u', $row)) {
+                            $ability .= "\n</p><p>\n"; // new paragraph comes
+                        }
                         $ability .= $row;
                         $row = false; // row has been consumed
                     }
