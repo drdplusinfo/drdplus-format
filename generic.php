@@ -206,7 +206,7 @@ function add_paragraphs(string $content): string
         } else {
             $rowsWithParagraphs[] = $row; // out of paragraph
         }
-        $previousIsEndOfSentence = (bool)preg_match('~[.!“)?]\s*$~u', $row);
+        $previousIsEndOfSentence = (bool)preg_match('~[.!“)?…]\s*$~u', $row);
     }
     if ($paragraph !== '') {
         $rowsWithParagraphs[] = trim($paragraph) . "\n</p>"; // end of paragraph;
