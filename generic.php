@@ -209,7 +209,7 @@ function add_paragraphs(string $content): string
             $rowsWithParagraphs[] = $row; // out of paragraph
         }
         $previousIsEndOfSentence = (bool)preg_match('~[.!“)?…]\s*$~u', $row);
-        $previousIsShortEnoughToBeEndOfParagraph = mb_strlen($row) < 50;
+        $previousIsShortEnoughToBeEndOfParagraph = mb_strlen($row) < 60;
     }
     if ($paragraph !== '') {
         $rowsWithParagraphs[] = trim($paragraph) . "\n</p>"; // end of paragraph;
