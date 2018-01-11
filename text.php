@@ -4,9 +4,9 @@ include_once __DIR__ . '/generic.php';
 function format_text(string $text): string
 {
     $fixed = fix_content($text);
-    $formatted2d6 = format_2k6_plus($fixed);
-    $withDivs = add_divs_and_headings($formatted2d6);
-    $withParagraphs = add_paragraphs($withDivs);
+    $formatted2d6 = format_2d6_plus($fixed);
+    $withDivsAndHeadings = add_divs_and_headings($formatted2d6);
+    $withParagraphs = add_paragraphs($withDivsAndHeadings);
 
     return add_introductions($withParagraphs);
 }

@@ -6,7 +6,7 @@ function thief_properties_highlighted(string $text)
     $highlighted = '';
     $text = join_rows($text);
     foreach (split_to_rows($text) as $row) {
-        $row = format_2k6_plus($row);
+        $row = format_2d6_plus($row);
         $row = add_duration_link($row);
         $row = add_concentration_link($row);
         $row = format_master_bonus($row);
@@ -59,7 +59,7 @@ function format_extended_roll_on_success(string $text)
     $formatted = ['<div class="calculation">'];
     $rows = split_to_rows($text);
     $formula = array_shift($rows);
-    $formatted[] = '<span class="formula">' . format_2k6_plus(str_replace(' :', ':', $formula)) . '</span>';
+    $formatted[] = '<span class="formula">' . format_2d6_plus(str_replace(' :', ':', $formula)) . '</span>';
     $formatted[] = '<table class="result">';
     foreach ($rows as $row) {
         $cells = preg_split('/\s*~\s*/', $row, -1, PREG_SPLIT_NO_EMPTY);

@@ -4,7 +4,7 @@ include_once __DIR__ . '/generic.php';
 function format_creature(string $creature): string
 {
     $creature = fix_content($creature);
-    $creature = format_2k6_plus($creature);
+    $creature = format_2d6_plus($creature);
     preg_match('~^(?<title>[\w –]+)[\n\r]+(?<parameters>.+)(?<description>Popis:.+)$~us', $creature, $matches);
 
     return "<h3 id=\"{$matches['title']}\">{$matches['title']}</h3>\n\n"

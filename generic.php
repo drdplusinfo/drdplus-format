@@ -29,7 +29,7 @@ HTML
 
 function unify_dash(string $text): string
 {
-    return str_replace('−', '-', $text);
+    return str_replace(['−', '­'], '-', $text);
 }
 
 function split_to_rows(string $text): array
@@ -42,7 +42,7 @@ function split_to_rows(string $text): array
     return preg_split("~[\r\n]+~", $text, -1, PREG_SPLIT_NO_EMPTY);
 }
 
-function format_2k6_plus(string $text): string
+function format_2d6_plus(string $text): string
 {
     return preg_replace('~2k6\+\s*~', '2k6<span class="upper-index">+</span>', $text);
 }
@@ -138,7 +138,7 @@ function fix_title(string $content): string
 function add_divs_and_headings(string $content): string
 {
     $blocks = preg_split(
-        '~(?:^|\s+)([[:upper:]][[:lower:]]+(?:\s+s)?(?:\s+[[:lower:]]+)*[?]?)[\r\n]+~u',
+        '~(?:^|\n+)([[:upper:]][[:lower:]]+(?:\s+)?(?:\s+[[:upper:]]?[[:lower:]]+)*[?]?)[\r\n]+~u',
         $content,
         -1,
         PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY
@@ -186,17 +186,19 @@ function add_paragraphs(string $content): string
 {
     $rows = explode("\n", $content);
     $previousIsEndOfSentence = false;
+    $previousIsShortEnoughToBeEndOfParagraph = false;
     $paragraph = '';
     $rowsWithParagraphs = [];
     foreach ($rows as $row) {
         if ($row === '') {
+            $rowsWithParagraphs[] = ''; // will be turned back to new line
             continue;
         }
         if ($paragraph !== '' && preg_match('~^</\w+>~u', $row)) { // HTML tag
             $rowsWithParagraphs[] = trim($paragraph) . "\n</p>"; // end of paragraph;
             $paragraph = '';
         }
-        if ($previousIsEndOfSentence && preg_match('~^[[:upper:]„]~u', $row)) {
+        if ($previousIsEndOfSentence && $previousIsShortEnoughToBeEndOfParagraph && preg_match('~^[[:upper:]„]~u', $row)) {
             if ($paragraph !== '') {
                 $rowsWithParagraphs[] = trim($paragraph) . "\n</p>"; // end of paragraph;
             }
@@ -207,10 +209,11 @@ function add_paragraphs(string $content): string
             $rowsWithParagraphs[] = $row; // out of paragraph
         }
         $previousIsEndOfSentence = (bool)preg_match('~[.!“)?…]\s*$~u', $row);
+        $previousIsShortEnoughToBeEndOfParagraph = mb_strlen($row) < 50;
     }
     if ($paragraph !== '') {
         $rowsWithParagraphs[] = trim($paragraph) . "\n</p>"; // end of paragraph;
     }
 
-    return implode("\n", $rowsWithParagraphs);
+    return trim(implode("\n", $rowsWithParagraphs));
 }
