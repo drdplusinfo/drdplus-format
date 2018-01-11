@@ -186,7 +186,6 @@ function add_paragraphs(string $content): string
 {
     $rows = explode("\n", $content);
     $previousIsEndOfSentence = false;
-    $previousIsShortEnoughToBeEndOfParagraph = false;
     $paragraph = '';
     $rowsWithParagraphs = [];
     foreach ($rows as $row) {
@@ -198,7 +197,7 @@ function add_paragraphs(string $content): string
             $rowsWithParagraphs[] = trim($paragraph) . "\n</p>"; // end of paragraph;
             $paragraph = '';
         }
-        if ($previousIsEndOfSentence && $previousIsShortEnoughToBeEndOfParagraph && preg_match('~^[[:upper:]„]~u', $row)) {
+        if ($previousIsEndOfSentence && preg_match('~^[[:upper:]„]~u', $row)) {
             if ($paragraph !== '') {
                 $rowsWithParagraphs[] = trim($paragraph) . "\n</p>"; // end of paragraph;
             }
@@ -209,7 +208,6 @@ function add_paragraphs(string $content): string
             $rowsWithParagraphs[] = $row; // out of paragraph
         }
         $previousIsEndOfSentence = (bool)preg_match('~[.!“)?…]\s*$~u', $row);
-        $previousIsShortEnoughToBeEndOfParagraph = mb_strlen($row) < 60;
     }
     if ($paragraph !== '') {
         $rowsWithParagraphs[] = trim($paragraph) . "\n</p>"; // end of paragraph;
