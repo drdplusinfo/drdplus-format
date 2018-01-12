@@ -29,7 +29,7 @@ HTML
 
 function unify_dash(string $text): string
 {
-    return str_replace(['−', '­'], '-', $text);
+    return str_replace(['−', '­', '–'], '-', $text);
 }
 
 function split_to_rows(string $text): array
@@ -61,15 +61,19 @@ function split_to_cells(string $row, string $wrappingTag): array
 {
     $parts = preg_split('~\s~', $row, -1, PREG_SPLIT_NO_EMPTY);
     $cellContent = [];
+    $previousPart = '';
     foreach ($parts as $index => $part) {
         if ($cellContent !== []
-            && (preg_match('~^([[:upper:]])~u', $part) || (preg_match('~^(-|\+|\d)~', $part) && ($parts[$index + 1] ?? '') !== 'm'))
-        ) {
+            && (preg_match('~^([[:upper:]])~u', $part)
+                || (preg_match('~^(-|\+|\d)~', $part) && ($parts[$index + 1] ?? '') !== 'm')
+                || (preg_match('~^(-|\+|\d)~', $previousPart) && ($parts[$index + 1] ?? '') !== 'm')
+            )) {
             $cell = "<$wrappingTag>" . implode(' ', $cellContent) . "</$wrappingTag>";
             $cells[] = $cell;
             $cellContent = [];
         }
         $cellContent[] = $part;
+        $previousPart = $part;
     }
     $cell = "<$wrappingTag>" . implode(' ', $cellContent) . "</$wrappingTag>";
     $cells[] = $cell;
@@ -138,7 +142,7 @@ function fix_title(string $content): string
 function add_divs_and_headings(string $content): string
 {
     $blocks = preg_split(
-        '~(?:^|\n+)([[:upper:]][[:lower:]]+(?:\s+)?(?:\s+(?:–\s+)?[[:upper:]]?[[:lower:]]+)*[?]?)[\r\n]+~u',
+        '~(?:^|\n+)((?:[[:upper:]]{1,2}\.\s*)?[[:upper:]][[:lower:]]+(?:\s+)?(?:\s+(?:–\s+)?[[:upper:]]?[[:lower:]]+)*[?]?)[\r\n]+~u',
         $content,
         -1,
         PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY

@@ -20,14 +20,14 @@
     </style>
 </head>
 <body>
-<form>
+<form method="post">
     <label>Tabulka<br>
         <textarea rows="5" cols="50" name="table" class="generic"></textarea>
     </label>
     <br>
     <input type="submit" value="Odeslat">
 </form>
-<form>
+<form method="post">
     <label>Kouzlo čaroděje<br>
         <textarea rows="5" cols="50" name="wizard_spell" class="wizard"></textarea>
     </label>
@@ -41,7 +41,7 @@
     <br>
     <input type="submit" value="Odeslat">
 </form>
-<form>
+<form method="post">
     <label>Bojové parametry kouzla<br>
         <textarea rows="5" cols="50" name="wizard_spell_combat_properties" class="wizard"></textarea>
     </label>
@@ -49,21 +49,21 @@
     <input type="submit" value="Odeslat">
 </form>
 <div class="clear"></div>
-<form>
+<form method="post">
     <label>Zlodějova schopnost<br>
         <textarea rows="5" cols="50" name="thief_skill_properties" class="thief"></textarea>
     </label>
     <br>
     <input type="submit" value="Odeslat">
 </form>
-<form>
+<form method="post">
     <label>Rozšířený hod na úspěch<br>
         <textarea rows="5" cols="50" name="extended_roll_on_success" class="thief"></textarea>
     </label>
     <br>
     <input type="submit" value="Odeslat">
 </form>
-<form>
+<form method="post">
     <label>Bojová dovednost zloděje<br>
         <textarea rows="5" cols="50" name="thief_combat_parameters" class="thief"></textarea>
     </label>
@@ -79,6 +79,13 @@
 </form>
 <div class="clear"></div>
 <form method="post">
+    <label>Tabulka PPJ<br>
+        <textarea rows="5" cols="50" name="table_dm" class="generic"></textarea>
+    </label>
+    <br>
+    <input type="submit" value="Odeslat">
+</form>
+<form method="post">
     <label>Text<br>
         <textarea rows="5" cols="50" name="text" class="text"></textarea>
     </label>
@@ -89,16 +96,16 @@
 <?php
 ini_set('error_reporting', -1);
 ini_set('display_errors', '1');
-if (!empty($_GET['table'])) {
+if (!empty($_POST['table'])) {
     require_once __DIR__ . '/generic.php';
-    $table = to_table($_GET['table']);
+    $table = to_table($_POST['table']);
     ?>
     <label>tabulka<br>
         <textarea rows="20" cols="80" id="result"><?= $table ?></textarea>
     </label>
-<?php } elseif (!empty($_GET['wizard_spell'])) {
+<?php } elseif (!empty($_POST['wizard_spell'])) {
     require_once __DIR__ . '/wizard.php';
-    $spellAsTable = wizard_spell_to_table($_GET['wizard_spell']);
+    $spellAsTable = wizard_spell_to_table($_POST['wizard_spell']);
     ?>
     <label>tabulka<br>
         <textarea rows="20" cols="80" id="result"><?= $spellAsTable ?></textarea>
@@ -110,30 +117,30 @@ if (!empty($_GET['table'])) {
     <label>tabulka<br>
         <textarea rows="20" cols="80" id="result"><?= $spellAsTable ?></textarea>
     </label>
-<?php } elseif (!empty($_GET['wizard_spell_combat_properties'])) {
+<?php } elseif (!empty($_POST['wizard_spell_combat_properties'])) {
     require_once __DIR__ . '/wizard.php';
-    $spellAsTable = wizard_spell_combat_parameters_to_table($_GET['wizard_spell_combat_properties']);
+    $spellAsTable = wizard_spell_combat_parameters_to_table($_POST['wizard_spell_combat_properties']);
     ?>
     <label>tabulka<br>
         <textarea rows="10" cols="80" id="result"><?= $spellAsTable ?></textarea>
     </label>
-<?php } elseif (!empty($_GET['thief_skill_properties'])) {
+<?php } elseif (!empty($_POST['thief_skill_properties'])) {
     require_once __DIR__ . '/thief.php';
-    $propertiesHighlighted = thief_properties_highlighted($_GET['thief_skill_properties']);
+    $propertiesHighlighted = thief_properties_highlighted($_POST['thief_skill_properties']);
     ?>
     <label>dovednost<br>
         <textarea rows="10" cols="80" id="result"><?= $propertiesHighlighted ?></textarea>
     </label>
-<?php } elseif (!empty($_GET['extended_roll_on_success'])) {
+<?php } elseif (!empty($_POST['extended_roll_on_success'])) {
     require_once __DIR__ . '/thief.php';
-    $extendedRollOnSuccess = format_extended_roll_on_success($_GET['extended_roll_on_success']);
+    $extendedRollOnSuccess = format_extended_roll_on_success($_POST['extended_roll_on_success']);
     ?>
     <label>hod<br>
         <textarea rows="9" cols="70" id="result"><?= $extendedRollOnSuccess ?></textarea>
     </label>
-<?php } elseif (!empty($_GET['thief_combat_parameters'])) {
+<?php } elseif (!empty($_POST['thief_combat_parameters'])) {
     require_once __DIR__ . '/thief.php';
-    $thiefCombatParameters = combat_parameters_to_table($_GET['thief_combat_parameters']);
+    $thiefCombatParameters = combat_parameters_to_table($_POST['thief_combat_parameters']);
     ?>
     <label>tabulka<br>
         <textarea rows="9" cols="70" id="result"><?= $thiefCombatParameters ?></textarea>
@@ -144,6 +151,13 @@ if (!empty($_GET['table'])) {
     ?>
     <label>tabulka<br>
         <textarea rows="20" cols="150" id="result"><?= $creature ?></textarea>
+    </label>
+<?php } elseif (!empty($_POST['table_dm'])) {
+    require_once __DIR__ . '/dm.php';
+    $dmTable = to_dm_table($_POST['table_dm']);
+    ?>
+    <label>tabulka<br>
+        <textarea rows="20" cols="150" id="result"><?= $dmTable ?></textarea>
     </label>
 <?php } elseif (!empty($_POST['text'])) {
     require_once __DIR__ . '/text.php';
