@@ -129,8 +129,9 @@ function fix_rows(string $content): string
     $delimitedRowsConcatenated = preg_replace('~-[\n\r]+\s*~', '', $content);
     $upsilonsConcatenated = preg_replace('~[\n\r]+\s*(y|ý)~u', '$1', $delimitedRowsConcatenated);
     $efConcatenated = preg_replace('~[\n\r]+\s*(f|fa|fě|fou|fu|fovi) ~u', '$1 ', $upsilonsConcatenated);
+    $czechLiConcatenated = preg_replace('~([[:alpha:]])\s*-\s*li([^[:alpha:]])~', '$1-li$2', $efConcatenated);
 
-    return preg_replace('~=\s+=~', '=', $efConcatenated);
+    return preg_replace('~=\s+=~', '=', $czechLiConcatenated);
 }
 
 function fix_title(string $content): string
@@ -142,7 +143,7 @@ function fix_title(string $content): string
 function add_divs_and_headings(string $content): string
 {
     $blocks = preg_split(
-        '~(?:^|\n+)((?:[[:upper:]]{1,2}\.\s*)?[[:upper:]][[:lower:]]+(?:\s+)?(?:\s+(?:–\s+)?[[:upper:]]?[[:lower:]]+)*[?]?)[\r\n]+~u',
+        '~(?:^|\n+)((?:[[:upper:]]{1,2}\.\s*)?[[:upper:]][[:lower:]]+(?:\s+)?(?:\s+(?:–\s+)?(?:[[:upper:]]?[[:lower:]]+|[[:upper:]]{2,}))*[?]?)[\r\n]+~u',
         $content,
         -1,
         PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY
