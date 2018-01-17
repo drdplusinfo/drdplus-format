@@ -92,6 +92,13 @@
     <br>
     <input type="submit" value="Odeslat">
 </form>
+<form method="post">
+    <label>Číslovaný seznam<br>
+        <textarea rows="5" cols="50" name="numbered-list" class="text"></textarea>
+    </label>
+    <br>
+    <input type="submit" value="Odeslat">
+</form>
 <div class="clear"></div>
 <?php
 ini_set('error_reporting', -1);
@@ -164,6 +171,13 @@ if (!empty($_POST['table'])) {
     $text = format_text($_POST['text']);
     ?>
     <label>formátovaný text<br>
+        <textarea rows="20" cols="150" id="result"><?= $text ?></textarea>
+    </label>
+<?php } elseif (!empty($_POST['numbered-list'])) {
+    require_once __DIR__ . '/numbered-list.php';
+    $text = format_text_with_numbered_list($_POST['numbered-list']);
+    ?>
+    <label>číslovaný seznam<br>
         <textarea rows="20" cols="150" id="result"><?= $text ?></textarea>
     </label>
 <?php } ?>

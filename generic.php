@@ -140,6 +140,13 @@ function fix_title(string $content): string
     return preg_replace('~^([[:upper:]]) ([[:lower:]])~u', '$1$2', $content);
 }
 
+function encode_bracket_to_html(string $content): string
+{
+    $lessThan = preg_replace('~<([a-z]*[ěščřžýáíéůúó])~u', '&lt;$1', $content);
+
+    return preg_replace('~([a-z]*[ěščřžýáíéůúó])>~u', '$1&gt;', $lessThan);
+}
+
 function add_divs_and_headings(string $content): string
 {
     $blocks = preg_split(

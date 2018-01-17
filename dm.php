@@ -5,7 +5,7 @@ function to_dm_table(string $text): string
 {
     $text = unify_dash($text);
     $rows = split_to_rows($text);
-    $headerRows = [['<th colspan="100%">' . $rows[0] . '</th>']];
+    $headerRows = [['<th colspan="100%" id="' . $rows[0] . '">' . $rows[0] . '</th>']];
     unset($rows[0]);
     if (!preg_match('~\d~', $rows[1])) {
         $headerRows[] = split_to_header_cells($rows[1]);

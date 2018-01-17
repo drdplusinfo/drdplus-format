@@ -5,7 +5,8 @@ function format_text(string $text): string
 {
     $fixed = fix_content($text);
     $formatted2d6 = format_2d6_plus($fixed);
-    $withDivsAndHeadings = add_divs_and_headings($formatted2d6);
+    $encodedBrackets = encode_bracket_to_html($formatted2d6);
+    $withDivsAndHeadings = add_divs_and_headings($encodedBrackets);
     $withParagraphs = add_paragraphs($withDivsAndHeadings);
 
     return add_introductions($withParagraphs);
