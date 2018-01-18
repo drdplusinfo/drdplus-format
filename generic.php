@@ -3,17 +3,25 @@ function to_table(string $text): string
 {
     $text = unify_dash($text);
     $rows = split_to_rows($text);
-    $headerRows = [['<th colspan="100%">' . $rows[0] . '</th>']];
-    unset($rows[0]);
-    if (!preg_match('~\d~', $rows[1])) {
-        $headerRows[] = split_to_header_cells($rows[1]);
-        unset($rows[1]);
+    $isResultTable = true;
+    foreach ($rows as $row) {
+        if (substr_count($row, '~') !== 1) {
+            $isResultTable = false;
+            break;
+        }
     }
-    $header = join_to_table_rows($headerRows);
-    $bodyRows = array_map('split_to_body_cells', $rows);
-    $body = join_to_table_rows($bodyRows);
+    if (!$isResultTable) {
+        $headerRows = [['<th colspan="100%">' . $rows[0] . '</th>']];
+        unset($rows[0]);
+        if (!preg_match('~\d~', $rows[1])) {
+            $headerRows[] = split_to_header_cells($rows[1]);
+            unset($rows[1]);
+        }
+        $header = join_to_table_rows($headerRows);
+        $bodyRows = array_map('split_to_body_cells', $rows);
+        $body = join_to_table_rows($bodyRows);
 
-    return htmlspecialchars(<<<HTML
+        return htmlspecialchars(<<<HTML
 <table class="basic">
     <thead>
         {$header}
@@ -24,7 +32,21 @@ function to_table(string $text): string
 </table>
 
 HTML
+        );
+    }
+    $bodyRows = array_map('split_to_body_cells', $rows);
+    $body = join_to_table_rows($bodyRows);
+
+    return htmlspecialchars(<<<HTML
+<table class="result">
+    <tbody>
+        {$body}
+    </tbody>
+</table>
+
+HTML
     );
+
 }
 
 function unify_dash(string $text): string
@@ -64,10 +86,12 @@ function split_to_cells(string $row, string $wrappingTag): array
     $previousPart = '';
     foreach ($parts as $index => $part) {
         if ($cellContent !== []
-            && (preg_match('~^([[:upper:]])~u', $part)
+            && ($part === '~' || $previousPart === '~'
+                || preg_match('~^([[:upper:]])~u', $part)
                 || (preg_match('~^(-|\+|\d)~', $part) && ($parts[$index + 1] ?? '') !== 'm')
                 || (preg_match('~^(-|\+|\d)~', $previousPart) && ($parts[$index + 1] ?? '') !== 'm')
-            )) {
+            )
+        ) {
             $cell = "<$wrappingTag>" . implode(' ', $cellContent) . "</$wrappingTag>";
             $cells[] = $cell;
             $cellContent = [];
