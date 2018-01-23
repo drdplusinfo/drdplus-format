@@ -182,6 +182,13 @@ function add_divs_and_headings(string $content): string
     if (count($blocks) < 2) {
         return $content;
     }
+    $encloseDif = function (string $text) {
+        if (mb_strlen($text) <= 80) {
+            $text = rtrim($text); // remove end of line of very-short text
+        }
+
+        return $text . "</div>\n";
+    };
     $formatted = '';
     for ($blockTitleIndex = 0, $blockIndex = 1, $blocksCount = count($blocks); $blockIndex < $blocksCount; $blockTitleIndex += 2, $blockIndex += 2) {
         $blockTitle = $blocks[$blockTitleIndex];
@@ -194,13 +201,14 @@ function add_divs_and_headings(string $content): string
         foreach ($rows as $row) {
             $row = trim($row);
             if (preg_match('~^\w+(\s+\w+)?:~u', $row)) { // new sub-block
-                if (preg_match('~^(?:Podmínky|Tajné mechanismy): ~u', $row)) {
-                    $row = preg_replace('~^(Podmínky|Tajné mechanismy): ~u', '<strong>$1</strong>: ', $row);
+                if (preg_match('~^(?:Podmínky|Tajné mechanismy|Spouštěcí moment|Popis zaměření|Počet stupňů|Předpoklady): ~u', $row)) {
+                    $row = preg_replace('~^(Podmínky|Tajné mechanismy|Spouštěcí moment|Popis zaměření|Počet stupňů|Předpoklady): ~u', '<strong>$1</strong>: ', $row);
                     $hasRangerSkillSubHeading = true;
                 }
                 if ($part !== '') { // finishing previous sub-block
-                    $parts[] = $part . "</div>\n";
+                    $parts[] = $encloseDif($part);
                     $part = '';
+                    $firstRowAfterTitle = true; // de facto a subtitle
                 }
             }
             if ($row !== '') {
@@ -215,7 +223,7 @@ function add_divs_and_headings(string $content): string
             }
         }
         if ($part !== '') {
-            $parts[] = $part . "</div>\n"; // last one
+            $parts[] = $encloseDif($part); // last one
         }
         $formatted .= implode("\n", $parts) . "\n";
     }
