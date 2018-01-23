@@ -168,7 +168,7 @@ function encode_bracket_to_html(string $content): string
 {
     $lessThan = preg_replace('~<([a-z]*[ěščřžýáíéůúó])~u', '&lt;$1', $content);
 
-    return preg_replace('~([a-z]*[ěščřžýáíéůúó])>~u', '$1&gt;', $lessThan);
+    return preg_replace('~([a-z]*[ěščřžýáíéůúó]|divočiny)>~u', '$1&gt;', $lessThan);
 }
 
 function add_divs_and_headings(string $content): string
@@ -190,20 +190,28 @@ function add_divs_and_headings(string $content): string
         $parts = ["<h3 id=\"$blockTitle\">$blockTitle</h3>"];
         $part = '';
         $firstRowAfterTitle = true;
+        $hasRangerSkillSubHeading = false;
         foreach ($rows as $row) {
+            $row = trim($row);
             if (preg_match('~^\w+(\s+\w+)?:~u', $row)) { // new sub-block
+                if (preg_match('~^(?:Podmínky|Tajné mechanismy): ~u', $row)) {
+                    $row = preg_replace('~^(Podmínky|Tajné mechanismy): ~u', '<strong>$1</strong>: ', $row);
+                    $hasRangerSkillSubHeading = true;
+                }
                 if ($part !== '') { // finishing previous sub-block
                     $parts[] = $part . "</div>\n";
                     $part = '';
                 }
             }
-            $row = trim($row);
             if ($row !== '') {
-                if ($firstRowAfterTitle) {
+                if ($hasRangerSkillSubHeading) {
+                    $part .= '<div class="reversed-paragraph">';
+                } elseif ($firstRowAfterTitle) {
                     $part .= "<div>\n";
                 }
                 $part .= $row . "\n";
                 $firstRowAfterTitle = false;
+                $hasRangerSkillSubHeading = false;
             }
         }
         if ($part !== '') {
