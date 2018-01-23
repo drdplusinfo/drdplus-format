@@ -1,4 +1,6 @@
 <?php
+include_once __DIR__ . '/numbered-list.php';
+
 function to_table(string $text): string
 {
     $text = unify_dash($text);
@@ -198,12 +200,24 @@ function add_divs_and_headings(string $content): string
         $part = '';
         $firstRowAfterTitle = true;
         $hasRangerSkillSubHeading = false;
+        $inList = false;
+        $toList = '';
         foreach ($rows as $row) {
             $row = trim($row);
             if (preg_match('~^\w+(\s+\w+)?:~u', $row)) { // new sub-block
-                if (preg_match('~^(?:Podmínky|Tajné mechanismy|Spouštěcí moment|Popis zaměření|Počet stupňů|Předpoklady): ~u', $row)) {
-                    $row = preg_replace('~^(Podmínky|Tajné mechanismy|Spouštěcí moment|Popis zaměření|Počet stupňů|Předpoklady): ~u', '<strong>$1</strong>: ', $row);
-                    $hasRangerSkillSubHeading = true;
+                if (preg_match('~^(?:Podmínky|Tajné mechanismy|Spouštěcí moment|Popis zaměření|Počet stupňů|Stupně znalosti|Předpoklady):~u', $row)) {
+                    if (strpos($row, 'Stupně znalosti') === 0) {
+                        $firstRowAfterTitle = true;
+                        $inList = true;
+                    } else {
+                        $hasRangerSkillSubHeading = true;
+                    }
+                    $row = preg_replace('~^(Podmínky|Tajné mechanismy|Spouštěcí moment|Popis zaměření|Počet stupňů|Stupně znalosti|Předpoklady):~u', '<strong>$1</strong>: ', $row);
+                }
+                if ($toList !== '') {
+                    $part .= format_numbered_list($toList);
+                    $toList = '';
+                    $inList = false;
                 }
                 if ($part !== '') { // finishing previous sub-block
                     $parts[] = $encloseDif($part);
@@ -217,10 +231,17 @@ function add_divs_and_headings(string $content): string
                 } elseif ($firstRowAfterTitle) {
                     $part .= "<div>\n";
                 }
-                $part .= $row . "\n";
+                if ($inList && !$firstRowAfterTitle /* not the title itself */) {
+                    $toList .= $row . "\n";
+                } else {
+                    $part .= $row . "\n";
+                }
                 $firstRowAfterTitle = false;
                 $hasRangerSkillSubHeading = false;
             }
+        }
+        if ($toList !== '') {
+            $part .= format_numbered_list($toList);
         }
         if ($part !== '') {
             $parts[] = $encloseDif($part); // last one
