@@ -229,7 +229,11 @@ function add_divs_and_headings(string $content): string
                 if ($hasRangerSkillSubHeading) {
                     $part .= '<div class="reversed-paragraph">';
                 } elseif ($firstRowAfterTitle) {
-                    $part .= "<div>\n";
+                    if (strpos($row, 'Příklad:') === 0) {
+                        $part .= "<div class=\"example\">\n";
+                    } else {
+                        $part .= "<div>\n";
+                    }
                 }
                 if ($inList && !$firstRowAfterTitle /* not the title itself */) {
                     $toList .= $row . "\n";
