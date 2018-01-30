@@ -155,7 +155,7 @@ function fix_rows(string $content): string
     $delimitedRowsConcatenated = preg_replace('~-[\n\r]+\s*~', '', $content);
     $upsilonsConcatenated = preg_replace('~[\n\r]+\s*(y|ý)~u', '$1', $delimitedRowsConcatenated);
     $efConcatenated = preg_replace('~[\n\r]+\s*(f|fa|fě|fou|fu|fovi) ~u', '$1 ', $upsilonsConcatenated);
-    $czechLiConcatenated = preg_replace('~([[:alpha:]])\s*-\s*li([^[:alpha:]])~', '$1-li$2', $efConcatenated);
+    $czechLiConcatenated = preg_replace('~([[:alpha:]])\s*-\s*li([^[:alpha:]])~u', '$1-li$2', $efConcatenated);
 
     return preg_replace('~=\s+=~', '=', $czechLiConcatenated);
 }
