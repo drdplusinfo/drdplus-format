@@ -196,7 +196,7 @@ function add_divs_and_headings(string $content): string
         $blockTitle = $blocks[$blockTitleIndex];
         $block = $blocks[$blockIndex];
         $rows = preg_split('~[\r\n]+~', $block, -1, PREG_SPLIT_NO_EMPTY);
-        $parts = ["<h3 id=\"$blockTitle\">$blockTitle</h3>"];
+        $parts = ["<h5 id=\"$blockTitle\">$blockTitle</h5>"];
         $part = '';
         $firstRowAfterTitle = true;
         $hasRangerSkillSubHeading = false;
