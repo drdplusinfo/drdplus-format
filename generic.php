@@ -154,7 +154,7 @@ function fix_rows(string $content): string
 {
     $delimitedRowsConcatenated = preg_replace('~-[\n\r]+\s*~', '', $content);
     $upsilonsConcatenated = preg_replace('~[\n\r]+\s*(y|ý)~u', '$1', $delimitedRowsConcatenated);
-    $efConcatenated = preg_replace('~[\n\r]+\s*(f|fa|fě|fou|fu|fovi) ~u', '$1 ', $upsilonsConcatenated);
+    $efConcatenated = preg_replace('~[\n\r]+\s*(f|fa|fě|fou|fu|fovi|lé) ~u', '$1 ', $upsilonsConcatenated);
     $czechLiConcatenated = preg_replace('~([[:alpha:]])\s*-\s*li([^[:alpha:]])~u', '$1-li$2', $efConcatenated);
 
     return preg_replace('~=\s+=~', '=', $czechLiConcatenated);
@@ -184,7 +184,7 @@ function add_divs_and_headings(string $content): string
     if (count($blocks) < 2) {
         return $content;
     }
-    $encloseDif = function (string $text) {
+    $encloseDiv = function (string $text) {
         if (mb_strlen($text) <= 80) {
             $text = rtrim($text); // remove end of line of very-short text
         }
@@ -202,17 +202,22 @@ function add_divs_and_headings(string $content): string
         $hasRangerSkillSubHeading = false;
         $inList = false;
         $toList = '';
+        $subHeadings = 'Podmínky|Tajné mechanismy|Spouštěcí moment|Popis zaměření|Počet stupňů|Stupně znalosti|Předpoklady|BP|Doba trvání';
         foreach ($rows as $row) {
             $row = trim($row);
             if (preg_match('~^\w+(\s+\w+)?:~u', $row)) { // new sub-block
-                if (preg_match('~^(?:Podmínky|Tajné mechanismy|Spouštěcí moment|Popis zaměření|Počet stupňů|Stupně znalosti|Předpoklady):~u', $row)) {
+                if (preg_match('~^(?:' . $subHeadings . '):~u', $row)) {
                     if (strpos($row, 'Stupně znalosti') === 0) {
                         $firstRowAfterTitle = true;
                         $inList = true;
+                    } elseif (strpos($row, 'BP') === 0) { // priest only
+                        $row = preg_replace('~^BP:\s*~', '<strong>BP (<a href="#Body přízně">Body přízně</a>)</strong>: ', $row);
+                    } elseif (strpos($row, 'Doba trvání') === 0) { // priest only
+                        $row = preg_replace('~^(Doba trvání):\s*([-+]?\d+)~u', '<strong>$1</strong>: <a href="https://pph.drdplus.info/#tabulka_casu">$2</a>', $row);
                     } else {
                         $hasRangerSkillSubHeading = true;
                     }
-                    $row = preg_replace('~^(Podmínky|Tajné mechanismy|Spouštěcí moment|Popis zaměření|Počet stupňů|Stupně znalosti|Předpoklady):~u', '<strong>$1</strong>: ', $row);
+                    $row = preg_replace('~^(' . $subHeadings . '):\s*~u', '<strong>$1</strong>: ', $row);
                 }
                 if ($toList !== '') {
                     $part .= format_numbered_list($toList);
@@ -220,7 +225,7 @@ function add_divs_and_headings(string $content): string
                     $inList = false;
                 }
                 if ($part !== '') { // finishing previous sub-block
-                    $parts[] = $encloseDif($part);
+                    $parts[] = $encloseDiv($part);
                     $part = '';
                     $firstRowAfterTitle = true; // de facto a subtitle
                 }
@@ -248,7 +253,7 @@ function add_divs_and_headings(string $content): string
             $part .= format_numbered_list($toList);
         }
         if ($part !== '') {
-            $parts[] = $encloseDif($part); // last one
+            $parts[] = $encloseDiv($part); // last one
         }
         $formatted .= implode("\n", $parts) . "\n";
     }
