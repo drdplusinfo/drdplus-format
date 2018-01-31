@@ -171,7 +171,7 @@ if (!empty($_POST['table'])) {
     $text = format_text($_POST['text']);
     ?>
     <label>formátovaný text<br>
-        <textarea rows="20" cols="150" id="result"><?= $text ?></textarea>
+        <textarea rows="30" cols="200" id="result"><?= $text ?></textarea>
     </label>
 <?php } elseif (!empty($_POST['numbered-list'])) {
     require_once __DIR__ . '/numbered-list.php';

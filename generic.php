@@ -197,63 +197,87 @@ function add_divs_and_headings(string $content): string
         $block = $blocks[$blockIndex];
         $rows = preg_split('~[\r\n]+~', $block, -1, PREG_SPLIT_NO_EMPTY);
         $parts = ["<h5 id=\"$blockTitle\">$blockTitle</h5>"];
-        $part = '';
-        $firstRowAfterTitle = true;
-        $hasRangerSkillSubHeading = false;
-        $inList = false;
-        $toList = '';
-        $subHeadings = 'Podmínky|Tajné mechanismy|Spouštěcí moment|Popis zaměření|Počet stupňů|Stupně znalosti|Předpoklady|BP|Doba trvání';
-        foreach ($rows as $row) {
-            $row = trim($row);
-            if (preg_match('~^\w+(\s+\w+)?:~u', $row)) { // new sub-block
-                if (preg_match('~^(?:' . $subHeadings . '):~u', $row)) {
-                    if (strpos($row, 'Stupně znalosti') === 0) {
-                        $firstRowAfterTitle = true;
-                        $inList = true;
-                    } elseif (strpos($row, 'BP') === 0) { // priest only
-                        $row = preg_replace('~^BP:\s*~', '<strong>BP (<a href="#Body přízně">Body přízně</a>)</strong>: ', $row);
-                    } elseif (strpos($row, 'Doba trvání') === 0) { // priest only
-                        $row = preg_replace('~^(Doba trvání):\s*([-+]?\d+)~u', '<strong>$1</strong>: <a href="https://pph.drdplus.info/#tabulka_casu">$2</a>', $row);
-                    } else {
-                        $hasRangerSkillSubHeading = true;
+        if (count($rows) > 0) {
+            $part = "<div>\n";
+            $firstRowAfterTitle = true;
+            $hasRangerSkillSubHeading = false;
+            $inList = false;
+            $toList = '';
+            $inParagraph = false;
+            $paragraphComes = false;
+            $subHeadings = 'Podmínky|Tajné mechanismy|Spouštěcí moment|Popis zaměření|Počet stupňů|Stupně znalosti|Předpoklady|BP|Doba trvání';
+            foreach ($rows as $row) {
+                $row = trim($row);
+                if (preg_match('~^\w+(\s+\w+)?:~u', $row)) { // new sub-block
+                    if (preg_match('~^(?:' . $subHeadings . '):~u', $row)) {
+                        if (strpos($row, 'Stupně znalosti') === 0) {
+                            $firstRowAfterTitle = true;
+                            $inList = true;
+                        } elseif (strpos($row, 'BP') === 0) { // priest only
+                            $paragraphComes = true;
+                            $row = preg_replace('~^BP:\s*~', '<strong>BP</strong> (<a href="#Body přízně">Body přízně</a>): ', $row);
+                        } elseif (strpos($row, 'Doba trvání') === 0) { // priest only
+                            $paragraphComes = true;
+                            $row = preg_replace('~^(Doba trvání):\s*([-+]?\d+)~u', '<strong>$1</strong>: <a href="https://pph.drdplus.info/#tabulka_casu">$2</a>', $row);
+                        } else {
+                            $hasRangerSkillSubHeading = true;
+                        }
+                        $row = preg_replace('~^(' . $subHeadings . '):\s*~u', '<strong>$1</strong>: ', $row);
                     }
-                    $row = preg_replace('~^(' . $subHeadings . '):\s*~u', '<strong>$1</strong>: ', $row);
+                    if ($toList !== '') {
+                        $part .= format_numbered_list($toList);
+                        $toList = '';
+                        $inList = false;
+                    }
+                    if ($part !== '') { // finishing previous sub-block
+                        if ($inParagraph) {
+                            $parts[] = rtrim($part) . '</p>';
+                            $inParagraph = false;
+                        } else {
+                            $enclosed = $encloseDiv($part);
+                            if ($paragraphComes) {
+                                $enclosed = rtrim($enclosed);
+                            }
+                            $parts[] = $enclosed;
+                        }
+                        $part = '';
+                        $firstRowAfterTitle = true; // de facto a subtitle
+                    }
                 }
-                if ($toList !== '') {
-                    $part .= format_numbered_list($toList);
-                    $toList = '';
-                    $inList = false;
-                }
-                if ($part !== '') { // finishing previous sub-block
-                    $parts[] = $encloseDiv($part);
-                    $part = '';
-                    $firstRowAfterTitle = true; // de facto a subtitle
+                if ($row !== '') {
+                    if ($hasRangerSkillSubHeading) {
+                        $part .= '<div class="reversed-paragraph">';
+                    } elseif ($firstRowAfterTitle) {
+                        if (strpos($row, 'Příklad:') === 0) {
+                            $part .= "<div class=\"example\">\n";
+                        } elseif ($paragraphComes) {
+                            $inParagraph = true;
+                            $paragraphComes = false;
+                            $part .= '<p>';
+                        } else {
+                            $part .= "<div>\n";
+                        }
+                    }
+                    if ($inList && !$firstRowAfterTitle /* not the title itself */) {
+                        $toList .= $row . "\n";
+                    } else {
+                        $part .= $row . "\n";
+                    }
+                    $firstRowAfterTitle = false;
+                    $hasRangerSkillSubHeading = false;
                 }
             }
-            if ($row !== '') {
-                if ($hasRangerSkillSubHeading) {
-                    $part .= '<div class="reversed-paragraph">';
-                } elseif ($firstRowAfterTitle) {
-                    if (strpos($row, 'Příklad:') === 0) {
-                        $part .= "<div class=\"example\">\n";
-                    } else {
-                        $part .= "<div>\n";
-                    }
-                }
-                if ($inList && !$firstRowAfterTitle /* not the title itself */) {
-                    $toList .= $row . "\n";
+            if ($toList !== '') {
+                $part .= format_numbered_list($toList);
+            }
+            if ($part !== '') {
+                if ($inParagraph) {
+                    $parts[] = rtrim($part) . '</p>';
                 } else {
-                    $part .= $row . "\n";
-                }
-                $firstRowAfterTitle = false;
-                $hasRangerSkillSubHeading = false;
+                    $parts[] = $encloseDiv($part);
+                } // last one
             }
-        }
-        if ($toList !== '') {
-            $part .= format_numbered_list($toList);
-        }
-        if ($part !== '') {
-            $parts[] = $encloseDiv($part); // last one
+            $parts[] = "</div>\n";
         }
         $formatted .= implode("\n", $parts) . "\n";
     }
