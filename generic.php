@@ -281,7 +281,8 @@ function add_divs_and_headings(string $content): string
                 } // last one
             }
             if ($needsWrapByDiv) { // wrap all of it by div
-                array_unshift($parts, '<div>');
+                $firstHeading = array_shift($parts);
+                array_unshift($parts, $firstHeading, '<div>');
                 $parts[] = '</div>';
             }
         }
