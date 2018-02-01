@@ -189,22 +189,23 @@ function add_divs_and_headings(string $content): string
             $text = rtrim($text); // remove end of line of very-short text
         }
 
-        return $text . "</div>\n";
+        return $text . '</div>';
     };
     $formatted = '';
     for ($blockTitleIndex = 0, $blockIndex = 1, $blocksCount = count($blocks); $blockIndex < $blocksCount; $blockTitleIndex += 2, $blockIndex += 2) {
         $blockTitle = $blocks[$blockTitleIndex];
         $block = $blocks[$blockIndex];
         $rows = preg_split('~[\r\n]+~', $block, -1, PREG_SPLIT_NO_EMPTY);
-        $parts = ["<h5 id=\"$blockTitle\">$blockTitle</h5>"];
+        $parts = ["<h4 id=\"$blockTitle\">$blockTitle</h4>"];
         if (count($rows) > 0) {
-            $part = "<div>\n";
+            $part = '';
             $firstRowAfterTitle = true;
             $hasRangerSkillSubHeading = false;
             $inList = false;
             $toList = '';
             $inParagraph = false;
             $paragraphComes = false;
+            $needsWrapByDiv = false;
             $subHeadings = 'Podmínky|Tajné mechanismy|Spouštěcí moment|Popis zaměření|Počet stupňů|Stupně znalosti|Předpoklady|BP|Doba trvání';
             foreach ($rows as $row) {
                 $row = trim($row);
@@ -249,9 +250,11 @@ function add_divs_and_headings(string $content): string
                         $part .= '<div class="reversed-paragraph">';
                     } elseif ($firstRowAfterTitle) {
                         if (strpos($row, 'Příklad:') === 0) {
+                            $needsWrapByDiv = true;
                             $part .= "<div class=\"example\">\n";
                         } elseif ($paragraphComes) {
                             $inParagraph = true;
+                            $needsWrapByDiv = true;
                             $paragraphComes = false;
                             $part .= '<p>';
                         } else {
@@ -277,15 +280,15 @@ function add_divs_and_headings(string $content): string
                     $parts[] = $encloseDiv($part);
                 } // last one
             }
-            $parts[] = "</div>\n";
+            if ($needsWrapByDiv) { // wrap all of it by div
+                array_unshift($parts, '<div>');
+                $parts[] = '</div>';
+            }
         }
-        $formatted .= implode("\n", $parts) . "\n";
+        $formatted .= implode("\n", $parts) . "\n\n";
     }
 
-    return str_replace('</div>
-<h3 ', '</div>
-
-<h3', $formatted);
+    return $formatted;
 }
 
 function add_paragraphs(string $content): string
