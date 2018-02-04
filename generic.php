@@ -322,6 +322,11 @@ function add_paragraphs(string $content): string
     if ($paragraph !== '') {
         $rowsWithParagraphs[] = trim($paragraph) . "\n</p>"; // end of paragraph;
     }
+    foreach ($rowsWithParagraphs as &$rowWithParagraph) {
+        if (strlen($rowWithParagraph) < 100) { // inline paragraph
+            $rowWithParagraph = preg_replace('~^<p>\s*(\S.+)\s*</p>$~', '<p>$1</p>', $rowWithParagraph);
+        }
+    }
 
     return trim(implode("\n", $rowsWithParagraphs));
 }
