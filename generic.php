@@ -1,5 +1,5 @@
 <?php
-include_once __DIR__ . '/numbered-list.php';
+include_once __DIR__ . '/list.php';
 
 function to_table(string $text): string
 {

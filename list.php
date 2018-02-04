@@ -35,3 +35,32 @@ function format_numbered_list(string $content): string
                 $items)
         ) . "\n</ul>";
 }
+
+function format_text_with_dotted_list(string $text): string
+{
+    $fixed = fix_content($text);
+    $formatted2d6 = format_2d6_plus($fixed);
+    $encodedBrackets = encode_bracket_to_html($formatted2d6);
+
+    return format_dotted_list($encodedBrackets);
+}
+
+function format_dotted_list(string $content): string
+{
+    $content = trim($content);
+    if (strpos($content, '•') !== 0) {
+        return $content;
+    }
+    $items = preg_split('~•~u', $content, -1, PREG_SPLIT_NO_EMPTY);
+
+    return "<ul>\n"
+        . implode(
+            "\n",
+            array_map(function (string $item) {
+                $item = trim($item);
+
+                return "<li>$item</li>";
+            },
+                $items)
+        ) . "\n</ul>";
+}

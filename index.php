@@ -99,6 +99,13 @@
     <br>
     <input type="submit" value="Odeslat">
 </form>
+<form method="post">
+    <label>Tečkovaný seznam<br>
+        <textarea rows="5" cols="50" name="dotted-list" class="text"></textarea>
+    </label>
+    <br>
+    <input type="submit" value="Odeslat">
+</form>
 <div class="clear"></div>
 <?php
 ini_set('error_reporting', -1);
@@ -174,10 +181,17 @@ if (!empty($_POST['table'])) {
         <textarea rows="30" cols="200" id="result"><?= $text ?></textarea>
     </label>
 <?php } elseif (!empty($_POST['numbered-list'])) {
-    require_once __DIR__ . '/numbered-list.php';
+    require_once __DIR__ . '/list.php';
     $text = format_text_with_numbered_list($_POST['numbered-list']);
     ?>
     <label>číslovaný seznam<br>
+        <textarea rows="20" cols="150" id="result"><?= $text ?></textarea>
+    </label>
+<?php } elseif (!empty($_POST['dotted-list'])) {
+    require_once __DIR__ . '/list.php';
+    $text = format_text_with_dotted_list($_POST['dotted-list']);
+    ?>
+    <label>tečkovaný seznam<br>
         <textarea rows="20" cols="150" id="result"><?= $text ?></textarea>
     </label>
 <?php } ?>
