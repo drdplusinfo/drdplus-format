@@ -15,18 +15,23 @@ function format_creature(string $creature): string
 
 function creature_to_table(string $creature): string
 {
-    $creature = preg_replace('~((?:Vlastnosti|Smysly):[^\r\n]+)[\r\n]+(.+)~', '$1 $2', $creature);
     $rawRows = preg_split('~[\r\n]+~', $creature);
     $rows = [];
+    $itsWounds = false;
     foreach ($rawRows as $rawRow) {
         $rawRow = trim($rawRow);
         if ($rawRow === '') {
             continue;
         }
         $parameterName = substr($rawRow, 0, strpos($rawRow, ':'));
+        $itsWounds = ($itsWounds && $parameterName === '') || $parameterName === 'Zranění';
         $cells = [];
         $cells[] = $parameterName . ($parameterName !== '' ? ':' : '');
-        $cells[] = $parameterName !== '' ? substr($rawRow, strpos($rawRow, ':') + 1) : $rawRow;
+        $parameterValue = $parameterName !== '' ? substr($rawRow, strpos($rawRow, ':') + 1) : $rawRow;
+        if ($itsWounds) {
+            $parameterValue = preg_replace('~^(\s*)([-+]?\s*\d+\s+[A-Z])(\s+)(\S)~', '$1$2,$3$4', $parameterValue); // add comma between wounds and their description
+        }
+        $cells[] = $parameterValue;
         $rows[] = matches_to_cells($cells);
     }
     $tableContent = implode(
@@ -52,7 +57,7 @@ HTML
 function creature_description(string $description, string $mainTitle): string
 {
     $description = preg_replace('~:\s*[\r\n]+~', ': ', $description); // sometimes are titles on new lines, we want them single-lined
-    $blocks = preg_split('~(Popis|Výskyt|Chování|Setkání(?:\s+I+)?|Boj|Zvláštní vlastnosti):~u', $description, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+    $blocks = preg_split('~(Popis|Výskyt|Chování|Setkání(?:\s+I+)?|Boj|Zvláštní vlastnosti|Reakce):~u', $description, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
     $formattedDescription = '';
     for ($blockTitleIndex = 0, $blockIndex = 1, $blocksCount = count($blocks); $blockIndex < $blocksCount; $blockTitleIndex += 2, $blockIndex += 2) {
         $blockTitle = $blocks[$blockTitleIndex];
