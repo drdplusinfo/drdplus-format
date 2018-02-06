@@ -15,6 +15,7 @@ function format_creature(string $creature): string
 
 function creature_to_table(string $creature): string
 {
+    $fixedCreature = preg_replace('~ÚČ:\s*[-+]?(\d+)~', 'ÚČ: $1', $creature);
     $rawRows = preg_split('~[\r\n]+~', $creature);
     $rows = [];
     $itsWounds = false;
