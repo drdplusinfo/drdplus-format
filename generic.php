@@ -88,10 +88,14 @@ function split_to_cells(string $row, string $wrappingTag): array
     $previousPart = '';
     foreach ($parts as $index => $part) {
         if ($cellContent !== []
-            && ($part === '~' || $previousPart === '~'
-                || preg_match('~^([[:upper:]])~u', $part)
-                || (preg_match('~^(-|\+|\d)~', $part) && ($parts[$index + 1] ?? '') !== 'm')
-                || (preg_match('~^(-|\+|\d)~', $previousPart) && ($parts[$index + 1] ?? '') !== 'm')
+            && ($part === '~'
+                || $previousPart === '~'
+                || (!(preg_match('~^[-+]?\d+([.,]\d+)?$~', $part) && preg_match('~^[-+]?\d+$~', $previousPart)) // not a digits with preceding digits
+                    && (preg_match('~^([[:upper:]])~u', $part)
+                        || (preg_match('~^[-\+\d]~', $part) && ($parts[$index + 1] ?? '') !== 'm')
+                        || (preg_match('~^[-+\d]~', $previousPart) && ($parts[$index + 1] ?? '') !== 'm')
+                    )
+                )
             )
         ) {
             $cell = "<$wrappingTag>" . implode(' ', $cellContent) . "</$wrappingTag>";
@@ -176,7 +180,7 @@ function encode_bracket_to_html(string $content): string
 function add_divs_and_headings(string $content): string
 {
     $blocks = preg_split(
-        '~(?:^|\n+)((?:[[:upper:]]{1,2}\.\s*)?[[:upper:]][[:lower:]]+(?:\s+)?(?:\s+(?:–\s+)?(?:[[:upper:]]?[[:lower:]]+|[[:upper:]]{2,}))*[?]?)[\r\n]+~u',
+        '~(?:^|\n+)((?:[[:upper:]]{1,2}\.\s*)?[[:upper:]][[:lower:]]+(?:\s+)?(?:\s+(?:–\s+)?(?:[[:upper:]]?[[:lower:]]+|[[:upper:]]{2,}))*[?…]?)[\r\n]+~u',
         $content,
         -1,
         PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY
@@ -193,7 +197,7 @@ function add_divs_and_headings(string $content): string
     };
     $formatted = '';
     for ($blockTitleIndex = 0, $blockIndex = 1, $blocksCount = count($blocks); $blockIndex < $blocksCount; $blockTitleIndex += 2, $blockIndex += 2) {
-        $blockTitle = $blocks[$blockTitleIndex];
+        $blockTitle = trim($blocks[$blockTitleIndex]);
         $blockTitle = preg_replace('~\s*[\r\n]+\s*~', ' ', $blockTitle);
         $block = $blocks[$blockIndex];
         $rows = preg_split('~[\r\n]+~', $block, -1, PREG_SPLIT_NO_EMPTY);
