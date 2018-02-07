@@ -6,6 +6,7 @@ function format_creature(string $creature): string
     $creature = fix_content($creature);
     $creature = format_2d6_plus($creature);
     preg_match('~^(?<title>[\w –]+)[\n\r]+(?<parameters>.+)(?<description>Popis:.+)$~us', $creature, $matches);
+    $matches['title'] = preg_replace('~\s*[\r\n]+\s*~', ' ', $matches['title']);
 
     return "<h3 id=\"{$matches['title']}\">{$matches['title']}</h3>\n\n"
         . '<img src="images/999.png" class="float-right">' . "\n\n"

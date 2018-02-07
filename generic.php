@@ -194,6 +194,7 @@ function add_divs_and_headings(string $content): string
     $formatted = '';
     for ($blockTitleIndex = 0, $blockIndex = 1, $blocksCount = count($blocks); $blockIndex < $blocksCount; $blockTitleIndex += 2, $blockIndex += 2) {
         $blockTitle = $blocks[$blockTitleIndex];
+        $blockTitle = preg_replace('~\s*[\r\n]+\s*~', ' ', $blockTitle);
         $block = $blocks[$blockIndex];
         $rows = preg_split('~[\r\n]+~', $block, -1, PREG_SPLIT_NO_EMPTY);
         $parts = ["<h4 id=\"$blockTitle\">$blockTitle</h4>"];
