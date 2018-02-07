@@ -15,7 +15,7 @@ function format_creature(string $creature): string
 
 function creature_to_table(string $creature): string
 {
-    $fixedCreature = preg_replace('~(ÚČ|Boj):\s*([-+]?\d+)~u', '$1: $2', $creature);
+    $fixedCreature = preg_replace('~(ÚČ|Boj):\s*([-+]?\d+|—)~u', '$1: $2', $creature);
     $fixedStamina = preg_replace('~(Výdrž:\s*)([[:upper:]][^:]+:)~u', "$1 —\n$2", $fixedCreature);
     $rawRows = preg_split('~[\r\n]+~', $fixedStamina);
     $rows = [];
