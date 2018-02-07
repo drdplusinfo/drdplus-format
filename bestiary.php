@@ -32,7 +32,7 @@ function creature_to_table(string $creature): string
         $parameterValue = $parameterName !== '' ? substr($rawRow, strpos($rawRow, ':') + 1) : $rawRow;
         if ($itsWounds) {
             $parameterValue = preg_replace('~^(\s*)([-+]?\s*\d+\s+[A-Z])(\s+)(\S)~', '$1$2,$3$4', $parameterValue); // add comma between wounds and their description
-        } elseif ($itsInvulnerability && $parameterValue === '—') {
+        } elseif ($itsInvulnerability && trim($parameterValue) === '—') {
             continue; // skip empty invulnerability
         }
         $cells[] = $parameterValue;
