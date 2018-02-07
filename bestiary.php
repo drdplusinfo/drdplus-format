@@ -15,22 +15,26 @@ function format_creature(string $creature): string
 
 function creature_to_table(string $creature): string
 {
-    $fixedCreature = preg_replace('~ÚČ:\s*[-+]?(\d+)~u', 'ÚČ: $1', $creature);
+    $fixedCreature = preg_replace('~(ÚČ|Boj):\s*([-+]?\d+)~u', '$1: $2', $creature);
     $rawRows = preg_split('~[\r\n]+~', $fixedCreature);
     $rows = [];
     $itsWounds = false;
+    $itsInvulnerability = false;
     foreach ($rawRows as $rawRow) {
         $rawRow = trim($rawRow);
         if ($rawRow === '') {
             continue;
         }
         $parameterName = substr($rawRow, 0, strpos($rawRow, ':'));
-        $itsWounds = ($itsWounds && $parameterName === '') || $parameterName === 'Zranění';
+        $itsWounds = ($itsWounds && $parameterName === '') || $parameterName === 'Zranění' || $parameterName === 'ZZ hejna';
+        $itsInvulnerability = $parameterName === 'Nezranitelnost';
         $cells = [];
         $cells[] = $parameterName . ($parameterName !== '' ? ':' : '');
         $parameterValue = $parameterName !== '' ? substr($rawRow, strpos($rawRow, ':') + 1) : $rawRow;
         if ($itsWounds) {
             $parameterValue = preg_replace('~^(\s*)([-+]?\s*\d+\s+[A-Z])(\s+)(\S)~', '$1$2,$3$4', $parameterValue); // add comma between wounds and their description
+        } elseif ($itsInvulnerability && $parameterValue = '—') {
+            continue; // skip empty invulnerability
         }
         $cells[] = $parameterValue;
         $rows[] = matches_to_cells($cells);
