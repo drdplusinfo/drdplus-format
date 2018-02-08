@@ -7,12 +7,17 @@ function to_dm_table(string $text): string
     $rows = split_to_rows($text);
     $headerRows = [['<th colspan="100%" id="' . $rows[0] . '">' . $rows[0] . '</th>']];
     unset($rows[0]);
+    $headerCellCount = -1;
     if (!preg_match('~\d~', $rows[1])) {
         $headerRows[] = split_to_header_cells($rows[1]);
+        $headerCellCount = max($headerCellCount, count(end($headerRows)));
         unset($rows[1]);
     }
     $header = join_to_table_rows($headerRows);
-    $bodyRows = array_map('split_to_body_cells', $rows);
+    $bodyRows = [];
+    foreach ($rows as $row) {
+        $bodyRows[] = split_to_body_cells($row, $headerCellCount);
+    }
     $body = join_to_table_rows($bodyRows);
     $rowsStartWithNumber = true;
     foreach ($rows as $row) {

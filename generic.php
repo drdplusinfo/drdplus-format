@@ -15,11 +15,16 @@ function to_table(string $text): string
     if (!$isResultTable) {
         $headerRows = [['<th colspan="100%">' . $rows[0] . '</th>']];
         unset($rows[0]);
+        $headerCellCount = -1;
         if (!preg_match('~\d~', $rows[1])) {
             $headerRows[] = split_to_header_cells($rows[1]);
+            $headerCellCount = max($headerCellCount, count(end($headerRows)));
             unset($rows[1]);
         }
         $header = join_to_table_rows($headerRows);
+        foreach ($rows as $row) {
+            $bodyRows[] = split_to_body_cells($row, $headerCellCount);
+        }
         $bodyRows = array_map('split_to_body_cells', $rows);
         $body = join_to_table_rows($bodyRows);
 
@@ -76,24 +81,26 @@ function split_to_header_cells(string $row): array
     return split_to_cells($row, 'th');
 }
 
-function split_to_body_cells(string $row): array
+function split_to_body_cells(string $row, int $maxCells = -1): array
 {
-    return split_to_cells($row, 'td');
+    return split_to_cells($row, 'td', $maxCells);
 }
 
-function split_to_cells(string $row, string $wrappingTag): array
+function split_to_cells(string $row, string $wrappingTag, int $cellCount = -1): array
 {
     $parts = preg_split('~\s~', $row, -1, PREG_SPLIT_NO_EMPTY);
     $cellContent = [];
     $previousPart = '';
+    $cells = [];
     foreach ($parts as $index => $part) {
         if ($cellContent !== []
+            && ($cellCount < 0 || ($cellCount - 1) > count($cells))
             && ($part === '~'
                 || $previousPart === '~'
                 || (!(preg_match('~^[-+]?\d+([.,]\d+)?$~', $part) && preg_match('~^[-+]?\d+$~', $previousPart)) // not a digits with preceding digits
                     && (preg_match('~^([[:upper:]])~u', $part)
-                        || (preg_match('~^[-\+\d]~', $part) && ($parts[$index + 1] ?? '') !== 'm')
-                        || (preg_match('~^[-+\d]~', $previousPart) && ($parts[$index + 1] ?? '') !== 'm')
+                        || (preg_match('~^[-+\d]~', $part) && !in_array($parts[$index + 1] ?? '', ['m', 'kg'], true))
+                        || (preg_match('~^[-+\d]~', $previousPart) && !in_array($part, ['m', 'kg'], true))
                     )
                 )
             )
@@ -107,6 +114,9 @@ function split_to_cells(string $row, string $wrappingTag): array
     }
     $cell = "<$wrappingTag>" . implode(' ', $cellContent) . "</$wrappingTag>";
     $cells[] = $cell;
+    for ($cellsToAdd = $cellCount - count($cells); $cellsToAdd > 0; $cellsToAdd--) {
+        $cells[] = "<$wrappingTag></$wrappingTag>";
+    }
 
     return $cells;
 }
