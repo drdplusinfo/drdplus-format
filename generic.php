@@ -154,6 +154,11 @@ function fix_content(string $content)
     return fix_title(fix_rows(unify_dash(unify_space(unify_new_lines($content)))));
 }
 
+function encode_brackets(string $content)
+{
+    return str_replace(['<', '>'], ['&lt;', '&gt;'], $content);
+}
+
 function unify_space(string $content): string
 {
     return str_replace('	' /* ord 9 */, ' ' /* space */, $content);
