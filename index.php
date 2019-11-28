@@ -86,8 +86,15 @@
     <input type="submit" value="Odeslat">
 </form>
 <form method="post">
-    <label>Text<br>
-        <textarea rows="5" cols="50" name="text" class="text"></textarea>
+    <label>Text s nadpisy<br>
+        <textarea rows="5" cols="50" name="text-with-headings" class="text"></textarea>
+    </label>
+    <br>
+    <input type="submit" value="Odeslat">
+</form>
+<form method="post">
+    <label>Holý text<br>
+        <textarea rows="5" cols="50" name="text-without-headings" class="text"></textarea>
     </label>
     <br>
     <input type="submit" value="Odeslat">
@@ -99,6 +106,7 @@
     <br>
     <input type="submit" value="Odeslat">
 </form>
+<div class="clear"></div>
 <form method="post">
     <label>Tečkovaný seznam<br>
         <textarea rows="5" cols="50" name="dotted-list" class="text"></textarea>
@@ -173,9 +181,16 @@ if (!empty($_POST['table'])) {
     <label>tabulka<br>
         <textarea rows="20" cols="150" id="result"><?= $dmTable ?></textarea>
     </label>
-<?php } elseif (!empty($_POST['text'])) {
+<?php } elseif (!empty($_POST['text-with-headings'])) {
     require_once __DIR__ . '/text.php';
-    $text = format_text($_POST['text']);
+    $text = format_text_with_headings($_POST['text-with-headings']);
+    ?>
+    <label>formátovaný text<br>
+        <textarea rows="30" cols="200" id="result"><?= htmlentities($text) ?></textarea>
+    </label>
+<?php } elseif (!empty($_POST['text-without-headings'])) {
+    require_once __DIR__ . '/text.php';
+    $text = format_text_without_headings($_POST['text-without-headings']);
     ?>
     <label>formátovaný text<br>
         <textarea rows="30" cols="200" id="result"><?= htmlentities($text) ?></textarea>

@@ -4,7 +4,7 @@ include_once __DIR__ . '/generic.php';
 function thief_properties_highlighted(string $text)
 {
     $highlighted = '';
-    $text = join_rows($text);
+    $text = join_thief_rows($text);
     foreach (split_to_rows($text) as $row) {
         $row = format_2d6_plus($row);
         $row = add_duration_link($row);
@@ -39,7 +39,7 @@ function format_master_bonus(string $text)
     return preg_replace('~Bonus Mistra:(\s*)([^-–]+)\s+[-–]~u', 'Bonus mistra:$1<span class="keyword"><a href="#$2">$2</a></span> –', $text);
 }
 
-function join_rows(string $text): string
+function join_thief_rows(string $text): string
 {
     $joined = '';
     foreach (split_to_rows($text) as $row) {
@@ -59,7 +59,8 @@ function format_extended_roll_on_success(string $text)
     $formatted = ['<div class="calculation">'];
     $rows = split_to_rows($text);
     $formula = array_shift($rows);
-    $formatted[] = '<span class="formula">' . format_2d6_plus(str_replace(' :', ':', $formula)) . '</span>';
+    $formulaWithUnifiedColon = preg_replace('~\s:~', ':', $formula);
+    $formatted[] = '<span class="formula">' . format_2d6_plus($formulaWithUnifiedColon) . '</span>';
     $formatted[] = '<table class="result">';
     foreach ($rows as $row) {
         $cells = preg_split('/\s*~\s*/', $row, -1, PREG_SPLIT_NO_EMPTY);
